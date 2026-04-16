@@ -224,12 +224,12 @@ function unlockScroll() { if (--openModalCount <= 0) { openModalCount = 0; docum
 
 function openWalletModal() {
   renderWalletList();
-  walletModal.classList.remove("hidden");
+  walletModal.classList.add("open");
   lockScroll();
 }
 
 function closeWalletModal() {
-  walletModal.classList.add("hidden");
+  walletModal.classList.remove("open");
   unlockScroll();
 }
 
@@ -277,12 +277,12 @@ function openNetworkModal() {
   networkModal.querySelectorAll(".network-option").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.network === activeNetwork);
   });
-  networkModal.classList.remove("hidden");
+  networkModal.classList.add("open");
   lockScroll();
 }
 
 function closeNetworkModal() {
-  networkModal.classList.add("hidden");
+  networkModal.classList.remove("open");
   unlockScroll();
 }
 
