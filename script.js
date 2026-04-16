@@ -289,8 +289,8 @@ function closeNetworkModal() {
 function setNetwork(networkId) {
   activeNetwork = networkId;
   const net = NETWORKS[networkId];
-  networkLabel.textContent = net.label;
-  networkDot.className = `network-dot ${networkId === "mainnet-beta" ? "green" : "yellow"}`;
+  if (networkLabel) networkLabel.textContent = net.label;
+  if (networkDot)   networkDot.className = `network-dot ${networkId === "mainnet-beta" ? "green" : "yellow"}`;
 
   if (connectedKey) {
     fetchAndDisplayBalance(connectedKey);
