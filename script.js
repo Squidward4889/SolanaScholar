@@ -638,9 +638,9 @@ walletButton.addEventListener("click", () => {
 walletModalClose.addEventListener("click", closeWalletModal);
 walletModalBackdrop.addEventListener("click", closeWalletModal);
 
-networkPill.addEventListener("click", openNetworkModal);
-networkModalClose.addEventListener("click", closeNetworkModal);
-networkModalBackdrop.addEventListener("click", closeNetworkModal);
+networkPill?.addEventListener("click", openNetworkModal);
+networkModalClose?.addEventListener("click", closeNetworkModal);
+networkModalBackdrop?.addEventListener("click", closeNetworkModal);
 
 networkModal.querySelectorAll(".network-option").forEach((btn) => {
   btn.addEventListener("click", () => {
