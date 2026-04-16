@@ -308,6 +308,11 @@ async function fetchAndDisplayBalance(pubkey) {
     const { Connection, PublicKey } = solanaWeb3;
     const connection = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
     const lamports = await connection.getBalance(new PublicKey(pubkey));
+    if (lamports === 0) {
+      // Hide pill for zero balance — prevents showing "0.0000 SOL" on fresh wallets
+      balancePill.classList.add("hidden");
+      return;
+    }
     const sol = (lamports / 1e9).toFixed(4);
     balanceOutput.textContent = `${sol} SOL`;
     balancePill.classList.remove("hidden");
