@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solana Scholar</title>
+  <meta
+    name="description"
+    content="Solana Scholar is the first crypto learning platform where knowledge is tracked and certified on-chain."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero tone-blue">
+      <nav class="nav">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span class="brand-text">Solana Scholar</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-links">
+            <a href="#tracks">Tracks</a>
+            <a href="#certificate-lab">Certificates</a>
+            <a href="#why-solana">Solana</a>
+            <a href="#pricing">Pricing</a>
+          </div>
+          <div class="wallet-bar">
+            <button class="network-pill" id="network-pill" type="button" aria-label="Switch network">
+              <span class="network-dot" id="network-dot"></span>
+              <span id="network-label">Mainnet</span>
+            </button>
+            <div class="balance-pill hidden" id="balance-pill">
+              <span id="balance-output">0 SOL</span>
+            </div>
+            <button class="wallet-button" id="wallet-button" type="button">
+              <span class="wallet-button-icon" id="wallet-icon"></span>
+              <span id="wallet-label">Connect Wallet</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <section class="hero-copy reveal">
+          <div class="hero-spacer" aria-hidden="true"></div>
+          <h1>Structured crypto education with on-chain certifications.</h1>
+          <p class="hero-text">
+            The first crypto learning platform where knowledge is tracked and certified on-chain.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#tracks">Explore courses</a>
+            <a class="button button-secondary" href="#certificate-lab">See certificates</a>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <main>
+      <section class="section tone-blue-soft" id="tracks">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Tracks</p>
+          <h2>Courses for all types of crypto enthusiasts.</h2>
+          <p>Verified experts. Up-to-date materials. Clear progression from beginner to advanced.</p>
+        </div>
+
+        <div class="track-controls reveal" id="track-controls" aria-label="Course track filters"></div>
+        <div class="track-grid reveal" id="track-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="section split-section tone-pink" id="certificate-lab">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Certificates</p>
+          <h2>Dynamic On-chain Certificates</h2>
+          <p>Live credentials that evolve with every milestone and reflect progress in real time.</p>
+        </div>
+
+        <div class="certificate-layout reveal">
+          <div class="certificate-controls card">
+            <label for="progress-range">Learning progress</label>
+            <input id="progress-range" type="range" min="8" max="100" step="1" value="42">
+            <div class="progress-meta">
+              <div>
+                <span class="meta-label">Progress</span>
+                <strong id="progress-output">42%</strong>
+              </div>
+              <div>
+                <span class="meta-label">Certificate tier</span>
+                <strong id="tier-output">Explorer</strong>
+              </div>
+              <div>
+                <span class="meta-label">Assessment score</span>
+                <strong id="score-output">77 / 100</strong>
+              </div>
+            </div>
+
+            <ul class="feature-list" id="certificate-features"></ul>
+          </div>
+
+          <div class="certificate-card card">
+            <div class="certificate-header">
+              <span class="certificate-badge" id="badge-output">Explorer</span>
+              <span class="certificate-chain">Minted on Solana</span>
+            </div>
+            <h3 id="certificate-title">Foundations Certificate</h3>
+            <p id="certificate-copy">A verifiable on-chain certificate issued as the learner advances through the curriculum.</p>
+
+            <div class="certificate-bars">
+              <div>
+                <span>Mastery</span>
+                <div class="bar-track"><span id="mastery-bar"></span></div>
+              </div>
+              <div>
+                <span>Metadata completeness</span>
+                <div class="bar-track"><span id="metadata-bar"></span></div>
+              </div>
+            </div>
+
+            <div class="certificate-details" id="certificate-details"></div>
+
+            <div class="claim-area">
+              <button class="button claim-button" id="claim-button" type="button">
+                Claim Certificate On-chain
+              </button>
+              <div class="tx-result hidden" id="tx-result">
+                <span class="tx-success-label">Certificate minted</span>
+                <a class="tx-link" id="tx-link" href="#" target="_blank" rel="noopener noreferrer">
+                  View on Explorer
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section tone-pink-soft" id="why-solana">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Why Solana</p>
+          <h2>Built on the chain where innovation turns into products quickly.</h2>
+          <p>Solana was chosen for token extensions, low fees, high TPS, and an ecosystem strong enough to scale certificate issuance.</p>
+        </div>
+
+        <div class="feature-grid reveal">
+          <article class="card mini-card">
+            <h3>Metadata Extension</h3>
+            <p>Adds user data and progress directly to the certificate.</p>
+          </article>
+          <article class="card mini-card">
+            <h3>Immutable Owner</h3>
+            <p>Guarantees certificates are wallet-bound and not tradable.</p>
+          </article>
+          <article class="card mini-card">
+            <h3>Memo Required</h3>
+            <p>Creates clear, user-friendly issuance records on-chain.</p>
+          </article>
+          <article class="card mini-card">
+            <h3>Low Cost &amp; High TPS</h3>
+            <p>Essential for scaling certificate emissions efficiently.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section tone-purple" id="pricing">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Pricing</p>
+          <h2>A subscription model designed for access and scale.</h2>
+          <p>Built based on platforms like Coursera, Udemy, and Podia. Providing access to all our courses under a single subscription.</p>
+        </div>
+
+        <div class="feature-grid reveal pricing-grid">
+          <article class="card mini-card pricing-card">
+            <h3>Monthly Subscription</h3>
+            <p class="price">$25<span>/mo</span></p>
+            <p>Access all Solana Scholar courses with flexible monthly billing.</p>
+          </article>
+          <article class="card mini-card pricing-card">
+            <h3>Yearly Subscription</h3>
+            <p class="price">$20<span>/mo</span></p>
+            <p>Best-value annual plan with full access to the platform curriculum.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section tone-purple">
+        <div class="proof-card reveal closing-card">
+          <p class="eyebrow">Vision</p>
+          <h2>We believe the next wave of crypto adoption will come from <span class="vision-highlight">education.</span></h2>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Wallet Connection Modal -->
+  <div class="wallet-modal hidden" id="wallet-modal" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title">
+    <div class="wallet-modal-backdrop" id="wallet-modal-backdrop"></div>
+    <div class="wallet-modal-panel">
+      <div class="wallet-modal-header">
+        <h3 id="wallet-modal-title">Connect a wallet</h3>
+        <p class="wallet-modal-sub">Connect your Solana wallet to claim certificates on-chain.</p>
+        <button class="wallet-modal-close" id="wallet-modal-close" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <ul class="wallet-list" id="wallet-list" role="list"></ul>
+      <p class="wallet-modal-note">
+        New to Solana?
+        <a href="https://phantom.app/" target="_blank" rel="noopener noreferrer">Get Phantom</a>
+        to get started.
+      </p>
+    </div>
+  </div>
+
+  <!-- Network Switcher Modal -->
+  <div class="wallet-modal hidden" id="network-modal" role="dialog" aria-modal="true" aria-labelledby="network-modal-title">
+    <div class="wallet-modal-backdrop" id="network-modal-backdrop"></div>
+    <div class="wallet-modal-panel network-modal-panel">
+      <div class="wallet-modal-header">
+        <h3 id="network-modal-title">Switch network</h3>
+        <p class="wallet-modal-sub">Choose a Solana cluster to connect to.</p>
+        <button class="wallet-modal-close" id="network-modal-close" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="network-options">
+        <button class="network-option" data-network="mainnet-beta" type="button">
+          <span class="network-dot green"></span>
+          <div>
+            <strong>Mainnet Beta</strong>
+            <span>Real SOL, live transactions</span>
+          </div>
+        </button>
+        <button class="network-option" data-network="devnet" type="button">
+          <span class="network-dot yellow"></span>
+          <div>
+            <strong>Devnet</strong>
+            <span>Test SOL, free to claim</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
