@@ -71,6 +71,7 @@ module.exports = async function handler(req, res) {
       mint: mintKeypair.publicKey.toString(),
       recipient: walletAddress,
       issuedAt: new Date().toISOString(),
+      note: "This is a test certificate for OG users of Solana Scholar.",
     });
 
     // ── Build transaction ─────────────────────────────────────────────────────

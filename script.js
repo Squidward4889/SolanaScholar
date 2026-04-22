@@ -138,15 +138,17 @@ const AIRDROP_AMOUNT = 1_000_000_000; // 1 SOL in lamports
 // State
 // ─────────────────────────────────────────────────────────────────────────────
 
-let provider       = null;
-let activeWallet   = null;
-let connectedKey   = null;
-let activeFilter   = "All";
-let activeNetwork  = "devnet";
-let currentTier    = null;
-let claimPending   = false;
-let airdropPending = false;
-let openModalCount = 0;
+let provider           = null;
+let activeWallet       = null;
+let connectedKey       = null;
+let activeFilter       = "All";
+let activeNetwork      = "devnet";
+let currentTier        = null;
+let claimPending       = false;
+let airdropPending     = false;
+let openModalCount     = 0;
+let certAlreadyMinted  = false;
+let existingMintAddress = null;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOM References
@@ -382,6 +384,15 @@ async function handleConnected(publicKey) {
 
   await fetchAndDisplayBalance(connectedKey);
   showToast(`${activeWallet?.name || "Wallet"} connected`, "success");
+
+  // Check on-chain for an existing OG cert; briefly show loading state
+  claimButton.disabled = true;
+  claimButton.textContent = "Checking wallet…";
+  await checkExistingCertificate(connectedKey);
+  if (!certAlreadyMinted) {
+    claimButton.disabled = false;
+    claimButton.textContent = "Claim OG Certificate";
+  }
 }
 
 async function connectWallet(walletDef) {
@@ -420,11 +431,49 @@ function resetWalletUI() {
   if (faucetButton) faucetButton.classList.add("hidden");
 
   // Reset claim state
-  claimPending = false;
+  claimPending        = false;
+  certAlreadyMinted   = false;
+  existingMintAddress = null;
   claimButton.disabled = false;
-  claimButton.classList.remove("claimed");
+  claimButton.classList.remove("claimed", "already-minted");
   claimButton.textContent = "Claim OG Certificate";
   txResult.classList.add("hidden");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OG Certificate — Duplicate Check
+// ─────────────────────────────────────────────────────────────────────────────
+
+function setAlreadyMintedUI(mintAddress) {
+  certAlreadyMinted   = true;
+  existingMintAddress = mintAddress;
+  claimButton.disabled = true;
+  claimButton.textContent = "Already Minted ✓";
+  claimButton.classList.add("already-minted");
+  claimButton.classList.remove("claimed");
+
+  if (mintAddress) {
+    const explorerUrl = NETWORKS[activeNetwork].mintExplorerUrl
+      ? NETWORKS[activeNetwork].mintExplorerUrl(mintAddress)
+      : `https://explorer.solana.com/address/${mintAddress}?cluster=devnet`;
+    txLink.href = explorerUrl;
+    if (txLabel) txLabel.textContent = `OG Cert · ${mintAddress.slice(0, 6)}...${mintAddress.slice(-4)}`;
+    txResult.classList.remove("hidden");
+  }
+}
+
+async function checkExistingCertificate(walletAddress) {
+  try {
+    const apiBase = window.location.origin;
+    const res = await fetch(
+      `${apiBase}/api/check-certificate?walletAddress=${encodeURIComponent(walletAddress)}`
+    );
+    if (!res.ok) return;
+    const { hasCertificate, mintAddress } = await res.json();
+    if (hasCertificate) setAlreadyMintedUI(mintAddress);
+  } catch {
+    // Silently ignore — fallback is the claim flow itself
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -433,6 +482,10 @@ function resetWalletUI() {
 
 async function claimOGCertificate() {
   if (claimPending) return;
+  if (certAlreadyMinted) {
+    showToast("You already hold an OG Certificate!", "info");
+    return;
+  }
 
   if (!connectedKey || !provider) {
     showToast("Connect your wallet first.", "error");
@@ -504,9 +557,12 @@ async function claimOGCertificate() {
     if (txLabel) txLabel.textContent = `OG Cert minted · ${mintAddress.slice(0, 6)}...${mintAddress.slice(-4)}`;
     txResult.classList.remove("hidden");
 
-    claimButton.textContent = "Certificate Claimed!";
-    claimButton.classList.add("claimed");
-    claimButton.disabled = false;
+    claimButton.textContent = "Already Minted ✓";
+    claimButton.classList.remove("claimed");
+    claimButton.classList.add("already-minted");
+    claimButton.disabled = true;
+    certAlreadyMinted   = true;
+    existingMintAddress = mintAddress;
 
     showToast("OG User Certificate minted on Solana!", "success");
     setTimeout(() => fetchAndDisplayBalance(connectedKey), 1500);
