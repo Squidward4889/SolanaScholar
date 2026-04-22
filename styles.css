@@ -374,6 +374,7 @@ a {
 
 .hero-copy h1 {
   font-size: clamp(2.6rem, 6vw, 4.6rem);
+  max-width: 15ch;
 }
 
 .hero-text,
@@ -587,6 +588,7 @@ a {
 
 .section {
   padding: 3rem 0;
+  scroll-margin-top: 72px;
 }
 
 .section-heading {
