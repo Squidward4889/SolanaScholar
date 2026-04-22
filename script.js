@@ -211,23 +211,23 @@ const NETWORKS = {
   }
 };
 
-const AIRDROP_AMOUNT = 1_000_000_000; // 1 SOL in lamports
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
 // ─────────────────────────────────────────────────────────────────────────────
 
-let provider           = null;
-let activeWallet       = null;
-let connectedKey       = null;
-let activeFilter       = "All";
-let activeNetwork      = "devnet";
-let currentTier        = null;
-let claimPending       = false;
-let airdropPending     = false;
-let openModalCount     = 0;
-let certAlreadyMinted  = false;
+let provider            = null;
+let activeWallet        = null;
+let connectedKey        = null;
+let activeFilter        = "All";
+let activeNetwork       = "devnet";
+let currentTier         = null;
+let claimPending        = false;
+let airdropPending      = false;
+let openModalCount      = 0;
+let certAlreadyMinted   = false;
 let existingMintAddress = null;
+let balancePollInterval = null;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOM References
@@ -389,53 +389,33 @@ async function fetchAndDisplayBalance(pubkey) {
 // Devnet Airdrop
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function requestAirdrop() {
-  if (airdropPending || !connectedKey) return;
+function openFaucet() {
+  if (!connectedKey) return;
   if (activeNetwork !== "devnet") {
-    showToast("Airdrops are only available on Devnet.", "error");
+    showToast("Faucet is only available on Devnet.", "error");
     return;
   }
-  if (typeof solanaWeb3 === "undefined") return;
-
-  airdropPending = true;
-  if (faucetButton) {
-    faucetButton.disabled = true;
-    faucetButton.textContent = "Requesting...";
-  }
-
-  try {
-    const { Connection, PublicKey } = solanaWeb3;
-    const connection = new Connection(NETWORKS.devnet.rpc, "confirmed");
-    const pubkey = new PublicKey(connectedKey);
-
-    const sig = await connection.requestAirdrop(pubkey, AIRDROP_AMOUNT);
-    showToast("Airdrop sent! Confirming...", "info");
-
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-    await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
-
-    showToast("1 devnet SOL received!", "success");
-    await fetchAndDisplayBalance(connectedKey);
-  } catch (err) {
-    const rateLimited = err.message?.toLowerCase().includes("429") || err.message?.toLowerCase().includes("rate");
-    showToast(
-      rateLimited
-        ? "Airdrop rate limited. Try again in 60s or use faucet.solana.com."
-        : "Airdrop failed. Try faucet.solana.com.",
-      "error"
-    );
-  } finally {
-    airdropPending = false;
-    if (faucetButton) {
-      faucetButton.disabled = false;
-      faucetButton.textContent = "Get Devnet SOL";
-    }
-  }
+  // Open faucet pre-filled with the user's wallet address
+  const url = `https://faucet.solana.com/?wallet=${encodeURIComponent(connectedKey)}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+  showToast("Faucet opened — balance will update automatically.", "info");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Wallet Connection
 // ─────────────────────────────────────────────────────────────────────────────
+
+function startBalancePolling() {
+  stopBalancePolling();
+  if (activeNetwork !== "devnet") return;
+  balancePollInterval = setInterval(() => {
+    if (connectedKey) fetchAndDisplayBalance(connectedKey);
+  }, 5000);
+}
+
+function stopBalancePolling() {
+  if (balancePollInterval) { clearInterval(balancePollInterval); balancePollInterval = null; }
+}
 
 function shortenAddress(addr) {
   return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
@@ -466,6 +446,7 @@ async function handleConnected(publicKey) {
   }
 
   await fetchAndDisplayBalance(connectedKey);
+  startBalancePolling();
   showToast(`${activeWallet?.name || "Wallet"} connected`, "success");
 
   // Check on-chain for an existing OG cert; briefly show loading state
@@ -510,6 +491,7 @@ function resetWalletUI() {
   walletLabel.textContent    = "Connect Wallet";
   walletIcon.style.background   = "";
   walletIcon.style.borderColor  = "";
+  stopBalancePolling();
   balancePill.classList.add("hidden");
   if (faucetButton) faucetButton.classList.add("hidden");
 
@@ -874,7 +856,7 @@ networkModal?.querySelectorAll(".network-option").forEach((btn) => {
   });
 });
 
-faucetButton?.addEventListener("click", requestAirdrop);
+faucetButton?.addEventListener("click", openFaucet);
 claimButton.addEventListener("click", claimOGCertificate);
 
 progressRange.addEventListener("input", (e) => {

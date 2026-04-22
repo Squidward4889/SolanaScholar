@@ -1,7 +1,7 @@
 {
-  "name": "OG User Certificate",
+  "name": "OG Solana Scholar",
   "symbol": "OGCERT",
-  "description": "An exclusive on-chain certificate for early Solana Scholar users. Minted with Token-2022 extensions — non-transferable, soulbound, and fully on-chain.",
+  "description": "This is a test certificate for OG users of Solana Scholar.",
   "image": "https://solana-scholar.vercel.app/og-cert-image.svg",
   "external_url": "https://solana-scholar.vercel.app",
   "attributes": [
