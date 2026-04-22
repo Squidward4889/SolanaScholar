@@ -248,7 +248,6 @@ const masteryBar     = document.getElementById("mastery-bar");
 const metadataBar    = document.getElementById("metadata-bar");
 
 const walletButton   = document.getElementById("wallet-button");
-const walletIcon     = document.getElementById("wallet-icon");
 const walletLabel    = document.getElementById("wallet-label");
 const balancePill    = document.getElementById("balance-pill");
 const balanceOutput  = document.getElementById("balance-output");
@@ -446,10 +445,6 @@ async function handleConnected(publicKey) {
   walletButton.classList.add("connected");
   walletLabel.textContent = shortenAddress(connectedKey);
 
-  if (activeWallet) {
-    walletIcon.style.background   = `${activeWallet.color}28`;
-    walletIcon.style.borderColor  = `${activeWallet.color}55`;
-  }
 
   // Show faucet button on devnet after connecting
   if (faucetButton && activeNetwork === "devnet") {
@@ -500,8 +495,6 @@ async function disconnectWallet() {
 function resetWalletUI() {
   walletButton.classList.remove("connected");
   walletLabel.textContent    = "Connect Wallet";
-  walletIcon.style.background   = "";
-  walletIcon.style.borderColor  = "";
   stopBalancePolling();
   balancePill.classList.add("hidden");
   if (faucetButton) faucetButton.classList.add("hidden");

@@ -18,7 +18,25 @@
     <header class="hero tone-blue">
       <nav class="nav">
         <div class="brand">
-          <span class="brand-mark"></span>
+          <svg class="brand-mark" width="28" height="22" viewBox="0 0 28 22" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="bar1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#79bcff"/>
+                <stop offset="100%" stop-color="#6b8fff"/>
+              </linearGradient>
+              <linearGradient id="bar2" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#9b7bff"/>
+                <stop offset="100%" stop-color="#b06aff"/>
+              </linearGradient>
+              <linearGradient id="bar3" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#c97aff"/>
+                <stop offset="100%" stop-color="#f07fcf"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0"  width="28" height="6" rx="3" fill="url(#bar1)"/>
+            <rect x="0" y="8"  width="28" height="6" rx="3" fill="url(#bar2)"/>
+            <rect x="0" y="16" width="28" height="6" rx="3" fill="url(#bar3)"/>
+          </svg>
           <span class="brand-text">Solana Scholar</span>
         </div>
         <div class="nav-group">
@@ -36,7 +54,6 @@
               Get Devnet SOL
             </button>
             <button class="wallet-button" id="wallet-button" type="button">
-              <span class="wallet-button-icon" id="wallet-icon"></span>
               <span id="wallet-label">Connect Wallet</span>
             </button>
           </div>

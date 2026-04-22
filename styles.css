@@ -109,11 +109,8 @@ a {
 }
 
 .brand-mark {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--cyan), var(--pink));
-  box-shadow: 0 0 22px rgba(121, 188, 255, 0.9);
+  display: block;
+  flex-shrink: 0;
 }
 
 .nav-links {
@@ -255,40 +252,6 @@ a {
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
 }
 
-.wallet-button-icon {
-  width: 1.65rem;
-  height: 1.65rem;
-  border-radius: 999px;
-  position: relative;
-  background: linear-gradient(135deg, rgba(121, 188, 255, 0.22), rgba(255, 94, 168, 0.28));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  flex-shrink: 0;
-  transition: background 280ms ease, border-color 280ms ease;
-}
-
-.wallet-button-icon::before,
-.wallet-button-icon::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: #f8f8fd;
-}
-
-.wallet-button-icon::before {
-  top: 0.34rem;
-  width: 0.84rem;
-  height: 0.58rem;
-  border-radius: 0.28rem;
-}
-
-.wallet-button-icon::after {
-  top: 0.86rem;
-  width: 0.56rem;
-  height: 0.32rem;
-  box-shadow: 0 -0.22rem 0 0 #f8f8fd;
-}
 
 /* ─── Hero ────────────────────────────────────── */
 
