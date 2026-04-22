@@ -121,7 +121,7 @@ a {
   display: block;
   flex-shrink: 0;
   position: relative;
-  top: -2px;
+  top: -1px;
 }
 
 .nav-links {
