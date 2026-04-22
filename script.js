@@ -273,6 +273,17 @@ const txLabel      = document.getElementById("tx-label");
 
 const toastStack   = document.getElementById("toast-stack");
 
+const pricingModal         = document.getElementById("pricing-modal");
+const pricingModalBackdrop = document.getElementById("pricing-modal-backdrop");
+const pricingModalClose    = document.getElementById("pricing-modal-close");
+const pmPlanLabel          = document.getElementById("pricing-modal-plan-label");
+const pmPriceBig           = document.getElementById("pm-price-big");
+const pmBillingNote        = document.getElementById("pm-billing-note");
+const pmBilledTotal        = document.getElementById("pm-billed-total");
+const pmCardBtn            = document.getElementById("pm-card-btn");
+const pmSolBtn             = document.getElementById("pm-sol-btn");
+const pmSolLabel           = document.getElementById("pm-sol-label");
+
 const coursePanel        = document.getElementById("course-panel");
 const coursePanelContent = document.getElementById("course-panel-content");
 const coursePanelClose   = document.getElementById("course-panel-close");
@@ -645,6 +656,117 @@ async function claimOGCertificate() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Pricing Modal
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PLANS = {
+  monthly: {
+    label:       "Monthly Plan",
+    price:       "$25",
+    billing:     "/month",
+    billed:      "Billed $25 monthly",
+    // Replace with your actual Stripe Payment Link after creating one at
+    // https://dashboard.stripe.com/payment-links
+    stripeLink:  "https://buy.stripe.com/REPLACE_MONTHLY",
+    solAmount:   0.25,   // ≈ $25 — update to reflect current SOL price
+  },
+  yearly: {
+    label:       "Yearly Plan",
+    price:       "$20",
+    billing:     "/month",
+    billed:      "Billed $240 per year — save $60",
+    stripeLink:  "https://buy.stripe.com/REPLACE_YEARLY",
+    solAmount:   2.4,    // ≈ $240 — update to reflect current SOL price
+  },
+};
+
+// Replace with your treasury wallet address to receive SOL payments
+const TREASURY_ADDRESS = "REPLACE_WITH_TREASURY_WALLET_ADDRESS";
+
+let activePlan = null;
+let solPayPending = false;
+
+function openPricingModal(planKey) {
+  const plan = PLANS[planKey];
+  if (!plan) return;
+  activePlan = planKey;
+
+  pmPlanLabel.textContent   = plan.label;
+  pmPriceBig.textContent    = plan.price;
+  pmBillingNote.textContent = plan.billing;
+  pmBilledTotal.textContent = plan.billed;
+
+  // Update SOL button label to show amount
+  pmSolLabel.textContent = `Pay ${plan.solAmount} SOL`;
+
+  pricingModal.classList.add("open");
+  lockScroll();
+}
+
+function closePricingModal() {
+  pricingModal.classList.remove("open");
+  unlockScroll();
+  activePlan = null;
+}
+
+async function handleSolPayment() {
+  if (solPayPending) return;
+  const plan = PLANS[activePlan];
+  if (!plan) return;
+
+  if (!connectedKey || !provider) {
+    closePricingModal();
+    openWalletModal();
+    showToast("Connect your wallet to pay with SOL.", "info");
+    return;
+  }
+
+  if (typeof solanaWeb3 === "undefined") {
+    showToast("Solana library not loaded. Refresh the page.", "error");
+    return;
+  }
+
+  solPayPending = true;
+  pmSolBtn.disabled = true;
+  pmSolLabel.textContent = "Sending…";
+
+  try {
+    const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, TransactionInstruction } = solanaWeb3;
+    const MEMO_PROG = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+    const connection    = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
+    const fromPubkey    = new PublicKey(connectedKey);
+    const toPubkey      = new PublicKey(TREASURY_ADDRESS);
+    const lamports      = Math.round(plan.solAmount * LAMPORTS_PER_SOL);
+
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+    const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
+
+    tx.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
+    tx.add(new TransactionInstruction({
+      keys:      [{ pubkey: fromPubkey, isSigner: true, isWritable: false }],
+      programId: MEMO_PROG,
+      data:      Buffer.from(`SolanaScholar subscription: ${activePlan}`, "utf8"),
+    }));
+
+    const signedTx = await provider.signTransaction(tx);
+    const sig = await connection.sendRawTransaction(signedTx.serialize(), { skipPreflight: false });
+    await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+
+    closePricingModal();
+    showToast(`Payment confirmed! Welcome to Solana Scholar.`, "success");
+    fetchAndDisplayBalance(connectedKey);
+  } catch (err) {
+    const rejected = err.code === 4001 || err.message?.toLowerCase().includes("rejected");
+    showToast(rejected ? "Payment cancelled." : (err.message || "Payment failed."), "error");
+  } finally {
+    solPayPending = false;
+    pmSolBtn.disabled = false;
+    if (activePlan) pmSolLabel.textContent = `Pay ${PLANS[activePlan].solAmount} SOL`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Course Panel
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -869,6 +991,22 @@ progressRange.addEventListener("input", (e) => {
 
 coursePanelClose?.addEventListener("click", closeCoursePanel);
 
+// Pricing modal
+pricingModalClose?.addEventListener("click", closePricingModal);
+pricingModalBackdrop?.addEventListener("click", closePricingModal);
+
+document.querySelectorAll(".subscribe-btn").forEach((btn) => {
+  btn.addEventListener("click", () => openPricingModal(btn.dataset.plan));
+});
+
+pmCardBtn?.addEventListener("click", () => {
+  const plan = PLANS[activePlan];
+  if (!plan) return;
+  window.open(plan.stripeLink, "_blank", "noopener,noreferrer");
+});
+
+pmSolBtn?.addEventListener("click", handleSolPayment);
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); closeCoursePanel(); }
+  if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); closeCoursePanel(); closePricingModal(); }
 });

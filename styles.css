@@ -128,10 +128,10 @@ a {
   gap: 1rem;
   /* Center-constrain content to match the 1160 px layout grid */
   padding: 0.75rem max(1rem, calc((100vw - 1160px) / 2));
-  background: rgba(4, 6, 17, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(9, 17, 48, 0.76);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-bottom: 1px solid rgba(121, 188, 255, 0.07);
 }
 
 .nav-group {
@@ -1300,6 +1300,211 @@ input[type="range"] {
 .closing-card {
   padding: 2.2rem 1.8rem;
   text-align: center;
+}
+
+/* ─── Subscribe Button (pricing cards) ───────── */
+
+.subscribe-btn {
+  margin-top: 1.4rem;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(123, 67, 255, 0.18), rgba(121, 188, 255, 0.14));
+  border-color: rgba(123, 67, 255, 0.32);
+  color: var(--text);
+  font-family: "Sora", sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.subscribe-btn:hover {
+  border-color: rgba(123, 67, 255, 0.6);
+  box-shadow: 0 0 24px rgba(123, 67, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ─── Pricing Modal ───────────────────────────── */
+
+.pricing-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.pricing-modal.open {
+  display: flex;
+}
+
+.pricing-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.pricing-modal-panel {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(160deg, rgba(13, 20, 50, 0.97), rgba(10, 8, 30, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  width: min(480px, calc(100vw - 2rem));
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+}
+
+.pricing-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.6rem;
+}
+
+.pricing-modal-header h3 {
+  font-family: "Sora", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+}
+
+.pricing-modal-header p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.pricing-modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.3rem;
+  line-height: 0;
+  transition: color 150ms;
+}
+
+.pricing-modal-close:hover { color: var(--text); }
+
+.pm-amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.pm-price-big {
+  font-family: "Sora", sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.pm-billing-note {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.pm-billed-total {
+  font-size: 0.78rem;
+  color: var(--muted);
+  opacity: 0.65;
+  margin: 0 0 1.4rem;
+}
+
+.pm-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.6rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.pm-features li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.pm-features li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), #7b43ff);
+}
+
+.pm-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 0 0 1.4rem;
+}
+
+.pm-methods {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pm-method-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.85rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-family: "Sora", sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  border: 1px solid transparent;
+}
+
+.pm-method-btn:hover { transform: translateY(-2px); }
+
+.pm-card-btn {
+  background: linear-gradient(135deg, rgba(121, 188, 255, 0.14), rgba(41, 96, 255, 0.12));
+  border-color: rgba(121, 188, 255, 0.28);
+  color: var(--text);
+}
+
+.pm-card-btn:hover {
+  border-color: rgba(121, 188, 255, 0.5);
+  box-shadow: 0 0 20px rgba(121, 188, 255, 0.15);
+}
+
+.pm-sol-btn {
+  background: linear-gradient(135deg, rgba(123, 67, 255, 0.16), rgba(255, 94, 168, 0.12));
+  border-color: rgba(123, 67, 255, 0.28);
+  color: var(--text);
+}
+
+.pm-sol-btn:hover {
+  border-color: rgba(123, 67, 255, 0.5);
+  box-shadow: 0 0 20px rgba(123, 67, 255, 0.15);
+}
+
+.pm-sol-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pm-footer-note {
+  font-size: 0.74rem;
+  color: var(--muted);
+  opacity: 0.55;
+  text-align: center;
+  margin: 0;
 }
 
 .vision-highlight {

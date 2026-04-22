@@ -18,6 +18,7 @@ const {
   getAssociatedTokenAddressSync,
   createAssociatedTokenAccountInstruction,
   createEnableRequiredMemoTransfersInstruction,
+  createReallocateInstruction,
 } = require("@solana/spl-token");
 
 const {
@@ -154,19 +155,31 @@ module.exports = async function handler(req, res) {
       mintKeypair.publicKey, TOKEN_2022_PROGRAM_ID
     ));
 
-    // 8. Enable MemoTransfer on the ATA (Memo Required extension)
+    // 8. Reallocate ATA to add space for the MemoTransfer extension.
+    //    ATAs are created at a fixed size; MemoTransfer needs its own TLV slot.
+    //    Reallocate transfers the extra rent-exempt lamports from payer → account.
+    tx.add(createReallocateInstruction(
+      userATA,                          // token account to grow
+      userPublicKey,                    // payer for the extra rent
+      [ExtensionType.MemoTransfer],     // extensions to add
+      userPublicKey,                    // owner
+      [],
+      TOKEN_2022_PROGRAM_ID
+    ));
+
+    // 9. Enable MemoTransfer on the ATA (now that the slot exists)
     tx.add(createEnableRequiredMemoTransfersInstruction(
       userATA, userPublicKey, [], TOKEN_2022_PROGRAM_ID
     ));
 
-    // 9. Memo instruction — before MintTo so wallets display it in the signing preview
+    // 10. Memo instruction — before MintTo so wallets display it in the signing preview
     tx.add(new TransactionInstruction({
       keys:      [{ pubkey: userPublicKey, isSigner: true, isWritable: false }],
       programId: MEMO_PROGRAM,
       data:      Buffer.from(memoText, "utf8"),
     }));
 
-    // 10. Mint exactly 1 certificate token to the user's ATA
+    // 11. Mint exactly 1 certificate token to the user's ATA
     tx.add(createMintToInstruction(
       mintKeypair.publicKey, userATA, mintAuthority.publicKey, 1, [], TOKEN_2022_PROGRAM_ID
     ));
