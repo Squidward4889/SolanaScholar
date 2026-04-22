@@ -109,10 +109,11 @@ a {
 }
 
 .brand-logo {
-  height: 22px;
+  height: 28px;
   width: auto;
   display: block;
   flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .nav-links {
