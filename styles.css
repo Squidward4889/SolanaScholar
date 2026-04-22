@@ -377,6 +377,14 @@ a {
   max-width: 15ch;
 }
 
+.hero-highlight {
+  white-space: nowrap;
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .hero-text,
 .section-heading p,
 .proof-card span,
@@ -386,9 +394,11 @@ a {
 }
 
 .hero-text {
-  max-width: 34ch;
-  margin: 1.2rem 0 0;
-  font-size: 1.1rem;
+  max-width: 44ch;
+  margin: 1.4rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(185, 192, 221, 0.85);
 }
 
 .hero-actions {
