@@ -108,12 +108,20 @@ a {
   letter-spacing: -0.03em;
 }
 
-.brand-logo {
+.brand-icon {
   height: 28px;
   width: auto;
   display: block;
   flex-shrink: 0;
-  vertical-align: middle;
+}
+
+.brand-text-img {
+  height: 28px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+  position: relative;
+  top: -4px;
 }
 
 .nav-links {
