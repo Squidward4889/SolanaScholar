@@ -425,10 +425,10 @@ a {
 .card,
 .glass-panel,
 .proof-card {
-  background: linear-gradient(180deg, rgba(14, 18, 35, 0.76), rgba(12, 10, 28, 0.9));
-  border: 1px solid var(--line);
-  box-shadow: var(--hero-shadow);
-  backdrop-filter: blur(16px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .hero-card,
