@@ -11,15 +11,27 @@ const {
   TOKEN_2022_PROGRAM_ID,
   createInitializeMintInstruction,
   createInitializeNonTransferableMintInstruction,
+  createInitializeMetadataPointerInstruction,
   getMintLen,
   ExtensionType,
   createMintToInstruction,
   getAssociatedTokenAddressSync,
   createAssociatedTokenAccountInstruction,
+  createEnableRequiredMemoTransfersInstruction,
 } = require("@solana/spl-token");
 
-const DEVNET_RPC = "https://api.devnet.solana.com";
-const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+const {
+  createInitializeInstruction: createTokenMetadataInstruction,
+  createUpdateFieldInstruction,
+  pack,
+} = require("@solana/spl-token-metadata");
+
+const DEVNET_RPC    = "https://api.devnet.solana.com";
+const MEMO_PROGRAM  = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+// TLV header sizes used when calculating TokenMetadata body space
+const TYPE_SIZE   = 2;
+const LENGTH_SIZE = 4;
 
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -27,108 +39,133 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST")    return res.status(405).json({ error: "Method not allowed" });
 
   try {
     const { walletAddress, tier } = req.body;
     if (!walletAddress) return res.status(400).json({ error: "walletAddress is required" });
 
-    // ── Mint authority from env ───────────────────────────────────────────────
     if (!process.env.MINT_AUTHORITY_SECRET_KEY) {
       return res.status(500).json({ error: "Server not configured" });
     }
 
     const secretKeyArray = JSON.parse(process.env.MINT_AUTHORITY_SECRET_KEY);
-    // fromSeed derives a valid Ed25519 keypair from 32 bytes
-    const mintAuthority = Keypair.fromSeed(Uint8Array.from(secretKeyArray.slice(0, 32)));
+    const mintAuthority  = Keypair.fromSeed(Uint8Array.from(secretKeyArray.slice(0, 32)));
 
-    const connection = new Connection(DEVNET_RPC, "confirmed");
+    const connection    = new Connection(DEVNET_RPC, "confirmed");
     const userPublicKey = new PublicKey(walletAddress);
-    const mintKeypair   = Keypair.generate();  // unique mint per certificate
+    const mintKeypair   = Keypair.generate();
+    const certTier      = tier || "Explorer";
 
-    const certTier = tier || "Explorer";
+    // ── On-chain metadata (Metadata Extension) ───────────────────────────────────
+    // The metadata account IS the mint itself (MetadataPointer points to mint).
+    const metadata = {
+      mint:               mintKeypair.publicKey,
+      name:               "OG User Certificate",
+      symbol:             "OGCERT",
+      uri:                "https://solana-scholar.vercel.app/og-cert-metadata.json",
+      additionalMetadata: [["tier", certTier]],
+    };
 
-    // ── Account sizing ────────────────────────────────────────────────────────
-    // NonTransferable is a zero-data extension — only the type+length header (4 bytes)
-    const extensions = [ExtensionType.NonTransferable];
-    const mintSpace  = getMintLen(extensions);
-    const lamports   = await connection.getMinimumBalanceForRentExemption(mintSpace);
+    // ── Account sizing ────────────────────────────────────────────────────────────
+    // IMPORTANT: Do NOT pass ExtensionType.TokenMetadata into getMintLen — it is a
+    // variable-length extension and getMintLen cannot know its size. Instead, add the
+    // packed metadata body manually (TYPE_SIZE + LENGTH_SIZE + pack().length).
+    // Passing TokenMetadata into getMintLen writes zero-byte padding that
+    // initializeMint misreads as corrupt extension data (Instruction 3 error).
+    const mintExtensions = [ExtensionType.NonTransferable, ExtensionType.MetadataPointer];
+    const mintSpace = getMintLen(mintExtensions) + TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
+    const lamports  = await connection.getMinimumBalanceForRentExemption(mintSpace);
 
-    // ── ATA for user ──────────────────────────────────────────────────────────
+    // ── ATA ───────────────────────────────────────────────────────────────────────
     const userATA = getAssociatedTokenAddressSync(
-      mintKeypair.publicKey,
-      userPublicKey,
-      false,
-      TOKEN_2022_PROGRAM_ID
+      mintKeypair.publicKey, userPublicKey, false, TOKEN_2022_PROGRAM_ID
     );
 
-    // ── On-chain memo — permanent issuance record ─────────────────────────────
-    const memoText = JSON.stringify({
-      program: "SolanaScholar",
-      version: "v1",
-      type: "OGCertificate",
-      tier: certTier,
-      mint: mintKeypair.publicKey.toString(),
-      recipient: walletAddress,
-      issuedAt: new Date().toISOString(),
-      note: "This is a test certificate for OG users of Solana Scholar.",
-    });
+    // ── Memo text ─────────────────────────────────────────────────────────────────
+    // Shown in the wallet signing UI when the user claims their certificate.
+    const memoText = "This is a test certificate for OG users of Solana Scholar.";
 
-    // ── Build transaction ─────────────────────────────────────────────────────
+    // ── Build transaction ─────────────────────────────────────────────────────────
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: userPublicKey });
 
-    // 1. Create the Token-2022 mint account (user pays rent)
+    // 1. Create the Token-2022 mint account sized for all extensions
     tx.add(SystemProgram.createAccount({
-      fromPubkey:    userPublicKey,
+      fromPubkey:       userPublicKey,
       newAccountPubkey: mintKeypair.publicKey,
-      space:         mintSpace,
+      space:            mintSpace,
       lamports,
-      programId:     TOKEN_2022_PROGRAM_ID,
+      programId:        TOKEN_2022_PROGRAM_ID,
     }));
 
-    // 2. Initialize NonTransferable extension (must precede InitializeMint)
+    // 2. NonTransferable extension — must precede InitializeMint
     tx.add(createInitializeNonTransferableMintInstruction(
       mintKeypair.publicKey,
       TOKEN_2022_PROGRAM_ID
     ));
 
-    // 3. Initialize the mint — 0 decimals, server is mint authority
+    // 3. MetadataPointer extension — must precede InitializeMint;
+    //    points to the mint itself as the metadata storage account
+    tx.add(createInitializeMetadataPointerInstruction(
+      mintKeypair.publicKey,    // mint
+      mintAuthority.publicKey,  // pointer update authority
+      mintKeypair.publicKey,    // metadata account = the mint itself
+      TOKEN_2022_PROGRAM_ID
+    ));
+
+    // 4. Initialize the mint (0 decimals, no freeze authority)
     tx.add(createInitializeMintInstruction(
-      mintKeypair.publicKey,
-      0,
-      mintAuthority.publicKey,
-      null,               // no freeze authority
-      TOKEN_2022_PROGRAM_ID
+      mintKeypair.publicKey, 0, mintAuthority.publicKey, null, TOKEN_2022_PROGRAM_ID
     ));
 
-    // 4. Create user's Associated Token Account
-    tx.add(createAssociatedTokenAccountInstruction(
-      userPublicKey,
-      userATA,
-      userPublicKey,
-      mintKeypair.publicKey,
-      TOKEN_2022_PROGRAM_ID
-    ));
-
-    // 5. Mint exactly 1 certificate token to user
-    tx.add(createMintToInstruction(
-      mintKeypair.publicKey,
-      userATA,
-      mintAuthority.publicKey,
-      1,
-      [],
-      TOKEN_2022_PROGRAM_ID
-    ));
-
-    // 6. Write issuance memo on-chain (permanent audit trail)
-    tx.add(new TransactionInstruction({
-      keys: [{ pubkey: userPublicKey, isSigner: true, isWritable: false }],
-      programId: MEMO_PROGRAM_ID,
-      data: Buffer.from(memoText, "utf8"),
+    // 5. Initialize TokenMetadata on-chain — must come AFTER InitializeMint
+    tx.add(createTokenMetadataInstruction({
+      programId:       TOKEN_2022_PROGRAM_ID,
+      metadata:        mintKeypair.publicKey,
+      updateAuthority: mintAuthority.publicKey,
+      mint:            mintKeypair.publicKey,
+      mintAuthority:   mintAuthority.publicKey,
+      name:            metadata.name,
+      symbol:          metadata.symbol,
+      uri:             metadata.uri,
     }));
 
-    // ── Server signs (mint account + mint authority) ───────────────────────────
+    // 6. Write the tier field into additionalMetadata
+    tx.add(createUpdateFieldInstruction({
+      programId:       TOKEN_2022_PROGRAM_ID,
+      metadata:        mintKeypair.publicKey,
+      updateAuthority: mintAuthority.publicKey,
+      field:           "tier",
+      value:           certTier,
+    }));
+
+    // 7. Create user's ATA — Token-2022 ATAs automatically include ImmutableOwner
+    tx.add(createAssociatedTokenAccountInstruction(
+      userPublicKey, userATA, userPublicKey,
+      mintKeypair.publicKey, TOKEN_2022_PROGRAM_ID
+    ));
+
+    // 8. Enable MemoTransfer on the ATA (Memo Required extension)
+    //    Requires owner (user) to sign — user is already signing as feePayer.
+    tx.add(createEnableRequiredMemoTransfersInstruction(
+      userATA, userPublicKey, [], TOKEN_2022_PROGRAM_ID
+    ));
+
+    // 9. Memo instruction — placed before MintTo so wallets display it
+    //    prominently in the signing UI, and satisfies MemoTransfer on future transfers.
+    tx.add(new TransactionInstruction({
+      keys:      [{ pubkey: userPublicKey, isSigner: true, isWritable: false }],
+      programId: MEMO_PROGRAM,
+      data:      Buffer.from(memoText, "utf8"),
+    }));
+
+    // 10. Mint exactly 1 certificate token to the user's ATA
+    tx.add(createMintToInstruction(
+      mintKeypair.publicKey, userATA, mintAuthority.publicKey, 1, [], TOKEN_2022_PROGRAM_ID
+    ));
+
+    // ── Server partial signs (mint keypair + mint authority) ──────────────────────
     tx.partialSign(mintKeypair, mintAuthority);
 
     const serialized = tx.serialize({ requireAllSignatures: false });
