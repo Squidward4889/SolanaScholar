@@ -673,6 +673,334 @@ a {
   background: linear-gradient(135deg, var(--cyan), var(--pink));
 }
 
+/* Track card — clickable affordance */
+.track-card {
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.track-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+}
+
+.track-card-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cyan);
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+  transition: opacity 150ms ease;
+}
+
+.track-card:hover .track-card-cta {
+  opacity: 1;
+}
+
+/* ─── Course Detail Panel ─────────────────────── */
+
+.course-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: var(--bg);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.course-panel.open {
+  transform: translateX(0);
+}
+
+.course-panel-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 2rem 5rem;
+}
+
+.course-panel-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  padding: 1.2rem 0 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 2.5rem;
+}
+
+.course-panel-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "Sora", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.course-panel-back:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Hero */
+.cp-hero {
+  margin-bottom: 2.4rem;
+}
+
+.cp-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.cp-cat,
+.cp-dur,
+.cp-proof {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.cp-cat {
+  background: rgba(123, 67, 255, 0.14);
+  border: 1px solid rgba(123, 67, 255, 0.3);
+  color: #b98cff;
+}
+
+.cp-dur {
+  background: rgba(121, 188, 255, 0.1);
+  border: 1px solid rgba(121, 188, 255, 0.22);
+  color: var(--cyan);
+}
+
+.cp-proof {
+  background: rgba(255, 94, 168, 0.1);
+  border: 1px solid rgba(255, 94, 168, 0.22);
+  color: var(--pink);
+}
+
+.cp-title {
+  font-family: "Sora", sans-serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.9rem;
+  color: var(--text);
+}
+
+.cp-desc {
+  font-size: 1.05rem;
+  color: var(--muted);
+  max-width: 640px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Progress block */
+.cp-progress-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 2.8rem;
+}
+
+.cp-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.cp-status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+.cp-pct {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: "Sora", sans-serif;
+  color: var(--muted);
+}
+
+.cp-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  margin-bottom: 0.7rem;
+}
+
+.cp-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  transition: width 600ms ease;
+}
+
+.cp-modules-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  opacity: 0.65;
+  margin: 0;
+}
+
+/* Body two-column grid */
+.cp-body-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Modules column */
+.cp-modules-col h3,
+.cp-sidebar h3 {
+  font-family: "Sora", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 1rem;
+}
+
+.cp-sidebar h3 + h3,
+.cp-sidebar h3 ~ h3 {
+  margin-top: 2rem;
+}
+
+.module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.module-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.module-item:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(121, 188, 255, 0.15);
+}
+
+.module-num {
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: "Space Grotesk", monospace;
+  color: var(--muted);
+  opacity: 0.5;
+  min-width: 1.6rem;
+}
+
+.module-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.module-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.module-duration {
+  font-size: 0.75rem;
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+.module-lock {
+  color: var(--muted);
+  opacity: 0.35;
+  display: flex;
+  align-items: center;
+}
+
+/* Sidebar */
+.cp-outcomes {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.cp-outcomes li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.cp-outcomes li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--pink));
+}
+
+.panel-details {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.panel-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.84rem;
+}
+
+.panel-detail-row span {
+  color: var(--muted);
+}
+
+.panel-detail-row strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 /* ─── Certificate Section ─────────────────────── */
 
 .certificate-layout {
@@ -1317,5 +1645,17 @@ input[type="range"] {
   .wallet-modal-panel {
     border-radius: var(--radius-lg);
     padding: 1.2rem;
+  }
+
+  .course-panel-inner {
+    padding: 0 1rem 4rem;
+  }
+
+  .cp-body-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-sidebar {
+    order: -1;
   }
 }

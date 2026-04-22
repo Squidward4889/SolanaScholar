@@ -9,7 +9,33 @@ const trackData = [
     duration: "4 weeks",
     proof: "Tier 1",
     description: "A structured entry into wallets, tokens, DeFi basics, and crypto fundamentals.",
-    outcomes: ["Curated content", "Structured progression", "High-quality learning materials"]
+    outcomes: ["Curated content", "Structured progression", "High-quality learning materials"],
+    modules: [
+      { title: "What Is a Blockchain",      duration: "45 min" },
+      { title: "Wallets & Private Keys",     duration: "50 min" },
+      { title: "Tokens vs. Coins",           duration: "40 min" },
+      { title: "DeFi Fundamentals",          duration: "60 min" },
+      { title: "Staking & Yield",            duration: "45 min" },
+      { title: "NFTs & Digital Assets",      duration: "40 min" },
+      { title: "Reading On-Chain Data",      duration: "55 min" },
+      { title: "Crypto Taxation Basics",     duration: "35 min" },
+    ]
+  },
+  {
+    category: "Beginner",
+    title: "Self Custody Basics",
+    duration: "2 weeks",
+    proof: "Tier 1",
+    description: "Learn to securely own your crypto without relying on exchanges or third parties. Covers hardware wallets, seed phrases, and real-world backup strategies.",
+    outcomes: ["Set up a hardware wallet", "Secure your seed phrase", "Avoid common self-custody pitfalls"],
+    modules: [
+      { title: "What Is Self Custody?",        duration: "30 min" },
+      { title: "Hardware Wallets Explained",   duration: "45 min" },
+      { title: "Seed Phrases & Security",      duration: "40 min" },
+      { title: "Multi-sig Wallets",            duration: "50 min" },
+      { title: "Backup Strategies",            duration: "35 min" },
+      { title: "Avoiding Common Mistakes",     duration: "40 min" },
+    ]
   },
   {
     category: "Analyst",
@@ -17,7 +43,33 @@ const trackData = [
     duration: "6 weeks",
     proof: "Tier 2",
     description: "Go deeper into protocol analysis, ecosystem context, and higher-signal research habits.",
-    outcomes: ["Interpret crypto ecosystems", "Understand market narratives", "Build stronger context"]
+    outcomes: ["Interpret crypto ecosystems", "Understand market narratives", "Build stronger context"],
+    modules: [
+      { title: "Reading Whitepapers",              duration: "60 min" },
+      { title: "On-Chain Analytics",               duration: "70 min" },
+      { title: "Market Cycles",                    duration: "55 min" },
+      { title: "Protocol Evaluation",              duration: "65 min" },
+      { title: "Tokenomics Deep Dive",             duration: "75 min" },
+      { title: "Ecosystem Mapping",                duration: "50 min" },
+      { title: "Narrative Trading",                duration: "60 min" },
+      { title: "Building a Research Portfolio",    duration: "45 min" },
+    ]
+  },
+  {
+    category: "Analyst",
+    title: "Perpetual Contracts Basics",
+    duration: "3 weeks",
+    proof: "Tier 2",
+    description: "Understand perps, funding rates, leverage, and how decentralized perpetual platforms work — with a focus on Solana-native protocols.",
+    outcomes: ["Trade perpetuals with confidence", "Understand funding mechanics", "Manage leverage risk"],
+    modules: [
+      { title: "Introduction to Perpetuals",       duration: "50 min" },
+      { title: "Funding Rates Explained",          duration: "55 min" },
+      { title: "Leverage & Liquidations",          duration: "60 min" },
+      { title: "Long / Short Mechanics",           duration: "45 min" },
+      { title: "Risk Management for Perps",        duration: "65 min" },
+      { title: "Perp Platforms on Solana",         duration: "50 min" },
+    ]
   },
   {
     category: "Builder",
@@ -25,8 +77,35 @@ const trackData = [
     duration: "8 weeks",
     proof: "Tier 3",
     description: "Explore Solana-native mechanics, token extensions, and advanced product understanding.",
-    outcomes: ["Study token extensions", "Follow innovation quickly", "Earn advanced certification"]
-  }
+    outcomes: ["Study token extensions", "Follow innovation quickly", "Earn advanced certification"],
+    modules: [
+      { title: "Solana Architecture Overview",        duration: "65 min" },
+      { title: "Account Model Deep Dive",             duration: "70 min" },
+      { title: "Token Extensions (Token-2022)",       duration: "80 min" },
+      { title: "Program Derived Addresses",           duration: "75 min" },
+      { title: "Cross-Program Invocations",           duration: "70 min" },
+      { title: "DePIN & Real World Assets",           duration: "60 min" },
+      { title: "MEV & Validator Economics",           duration: "65 min" },
+      { title: "Ecosystem Product Analysis",          duration: "55 min" },
+    ]
+  },
+  {
+    category: "Builder",
+    title: "Launch Your First Solana dApp",
+    duration: "5 weeks",
+    proof: "Tier 2",
+    description: "A hands-on course covering Solana program architecture, the Anchor framework, React frontend integration, and end-to-end deployment on Devnet and Mainnet.",
+    outcomes: ["Write Anchor programs from scratch", "Build React + Web3.js frontends", "Deploy to Devnet & Mainnet"],
+    modules: [
+      { title: "Solana Program Architecture",          duration: "70 min" },
+      { title: "Anchor Framework Basics",              duration: "80 min" },
+      { title: "Writing Your First Program",           duration: "90 min" },
+      { title: "Frontend with React & Web3.js",        duration: "75 min" },
+      { title: "Token Integration",                    duration: "65 min" },
+      { title: "Testing & Devnet Deployment",          duration: "70 min" },
+      { title: "Mainnet Launch Checklist",             duration: "55 min" },
+    ]
+  },
 ];
 
 const certificateMilestones = [
@@ -193,6 +272,10 @@ const txLink       = document.getElementById("tx-link");
 const txLabel      = document.getElementById("tx-label");
 
 const toastStack   = document.getElementById("toast-stack");
+
+const coursePanel        = document.getElementById("course-panel");
+const coursePanelContent = document.getElementById("course-panel-content");
+const coursePanelClose   = document.getElementById("course-panel-close");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Toast
@@ -580,6 +663,86 @@ async function claimOGCertificate() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Course Panel
+// ─────────────────────────────────────────────────────────────────────────────
+
+function openCoursePanel(track) {
+  const modulesHTML = track.modules.map((mod, i) => `
+    <div class="module-item">
+      <span class="module-num">${String(i + 1).padStart(2, "0")}</span>
+      <div class="module-info">
+        <span class="module-title">${mod.title}</span>
+        <span class="module-duration">${mod.duration}</span>
+      </div>
+      <span class="module-lock" aria-label="Locked">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <rect x="2.5" y="5.5" width="8" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M4 5.5V4a2.5 2.5 0 0 1 5 0v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </div>
+  `).join("");
+
+  const detailsHTML = [
+    ["Duration",    track.duration],
+    ["Certificate", track.proof],
+    ["Modules",     track.modules.length],
+    ["Level",       track.category],
+  ].map(([l, v]) => `<div class="panel-detail-row"><span>${l}</span><strong>${v}</strong></div>`).join("");
+
+  const outcomesHTML = track.outcomes
+    .map((o) => `<li>${o}</li>`)
+    .join("");
+
+  coursePanelContent.innerHTML = `
+    <div class="cp-hero">
+      <div class="cp-meta-row">
+        <span class="cp-cat">${track.category}</span>
+        <span class="cp-dur">${track.duration}</span>
+        <span class="cp-proof">${track.proof}</span>
+      </div>
+      <h1 id="course-panel-title" class="cp-title">${track.title}</h1>
+      <p class="cp-desc">${track.description}</p>
+    </div>
+
+    <div class="cp-progress-block">
+      <div class="cp-progress-header">
+        <span class="cp-status-pill">Not Started</span>
+        <span class="cp-pct">0%</span>
+      </div>
+      <div class="bar-track cp-bar">
+        <span style="width:0%"></span>
+      </div>
+      <p class="cp-modules-note">0 of ${track.modules.length} modules complete</p>
+    </div>
+
+    <div class="cp-body-grid">
+      <section class="cp-modules-col">
+        <h3>Course Modules</h3>
+        <div class="module-list">${modulesHTML}</div>
+      </section>
+
+      <aside class="cp-sidebar">
+        <h3>What You'll Learn</h3>
+        <ul class="cp-outcomes">${outcomesHTML}</ul>
+
+        <h3>Details</h3>
+        <div class="panel-details">${detailsHTML}</div>
+      </aside>
+    </div>
+  `;
+
+  coursePanel.classList.add("open");
+  coursePanel.scrollTop = 0;
+  lockScroll();
+}
+
+function closeCoursePanel() {
+  coursePanel.classList.remove("open");
+  unlockScroll();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Track Filters & Render
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -603,6 +766,9 @@ function renderTracks() {
   visible.forEach((track) => {
     const card = document.createElement("article");
     card.className = "track-card card";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `Open ${track.title} course`);
     card.innerHTML = `
       <div class="track-meta">
         <span>${track.category}</span>
@@ -612,7 +778,11 @@ function renderTracks() {
       <h3>${track.title}</h3>
       <p>${track.description}</p>
       <ul class="track-list">${track.outcomes.map((o) => `<li>${o}</li>`).join("")}</ul>
+      <span class="track-card-cta">View course →</span>
     `;
+    const open = () => openCoursePanel(track);
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
     grid.appendChild(card);
   });
 }
@@ -715,6 +885,8 @@ progressRange.addEventListener("input", (e) => {
   claimButton.disabled = false;
 });
 
+coursePanelClose?.addEventListener("click", closeCoursePanel);
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); }
+  if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); closeCoursePanel(); }
 });
