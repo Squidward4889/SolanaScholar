@@ -657,12 +657,7 @@ a {
 }
 
 .track-card::before {
-  content: "";
-  position: absolute;
-  inset: auto -1rem -3rem auto;
-  width: 11rem;
-  height: 11rem;
-  background: radial-gradient(circle, rgba(121, 188, 255, 0.22), transparent 62%);
+  display: none;
 }
 
 .track-card h3,
