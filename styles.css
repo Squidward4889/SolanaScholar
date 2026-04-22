@@ -59,6 +59,11 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Align with nav edges instead of 1160px centered box */
+  width: auto;
+  max-width: 1400px;
+  margin-left: max(1.5rem, calc((100vw - 1400px) / 2));
+  margin-right: max(1.5rem, calc((100vw - 1400px) / 2));
 }
 
 .tone-blue,
