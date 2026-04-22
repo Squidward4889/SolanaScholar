@@ -108,7 +108,9 @@ a {
   letter-spacing: -0.03em;
 }
 
-.brand-mark {
+.brand-logo {
+  height: 32px;
+  width: auto;
   display: block;
   flex-shrink: 0;
 }
