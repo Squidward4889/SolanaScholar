@@ -1482,18 +1482,18 @@ input[type="range"] {
   box-shadow: 0 0 20px rgba(121, 188, 255, 0.15);
 }
 
-.pm-sol-btn {
-  background: linear-gradient(135deg, rgba(123, 67, 255, 0.16), rgba(255, 94, 168, 0.12));
-  border-color: rgba(123, 67, 255, 0.28);
+.pm-usdc-btn {
+  background: linear-gradient(135deg, rgba(39, 174, 139, 0.16), rgba(39, 174, 255, 0.12));
+  border-color: rgba(39, 174, 139, 0.28);
   color: var(--text);
 }
 
-.pm-sol-btn:hover {
-  border-color: rgba(123, 67, 255, 0.5);
-  box-shadow: 0 0 20px rgba(123, 67, 255, 0.15);
+.pm-usdc-btn:hover {
+  border-color: rgba(39, 174, 139, 0.5);
+  box-shadow: 0 0 20px rgba(39, 174, 139, 0.15);
 }
 
-.pm-sol-btn:disabled {
+.pm-usdc-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;

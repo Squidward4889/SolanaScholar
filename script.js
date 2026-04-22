@@ -281,8 +281,8 @@ const pmPriceBig           = document.getElementById("pm-price-big");
 const pmBillingNote        = document.getElementById("pm-billing-note");
 const pmBilledTotal        = document.getElementById("pm-billed-total");
 const pmCardBtn            = document.getElementById("pm-card-btn");
-const pmSolBtn             = document.getElementById("pm-sol-btn");
-const pmSolLabel           = document.getElementById("pm-sol-label");
+const pmUsdcBtn            = document.getElementById("pm-usdc-btn");
+const pmUsdcLabel          = document.getElementById("pm-usdc-label");
 
 const coursePanel        = document.getElementById("course-panel");
 const coursePanelContent = document.getElementById("course-panel-content");
@@ -644,12 +644,32 @@ async function claimOGCertificate() {
     setTimeout(() => fetchAndDisplayBalance(connectedKey), 1500);
 
   } catch (err) {
-    claimButton.textContent = "Claim OG Certificate";
-    claimButton.classList.remove("claimed");
-    claimButton.disabled = false;
+    const rejected = err.code === 4001 ||
+      err.message?.toLowerCase().includes("rejected") ||
+      err.message?.toLowerCase().includes("cancelled");
 
-    const rejected = err.code === 4001 || err.message?.toLowerCase().includes("rejected") || err.message?.toLowerCase().includes("cancelled");
-    showToast(rejected ? "Transaction rejected." : (err.message || "Transaction failed."), "error");
+    if (!rejected && connectedKey) {
+      // Transaction may have landed despite the error (network blip, timeout,
+      // "already processed" on retry, etc.).  Check on-chain before giving up.
+      claimButton.textContent = "Verifying…";
+      claimButton.disabled = true;
+      await checkExistingCertificate(connectedKey);
+      if (certAlreadyMinted) {
+        showToast("Certificate minted successfully!", "success");
+        fetchAndDisplayBalance(connectedKey);
+        return; // setAlreadyMintedUI already applied — leave button as-is
+      }
+    }
+
+    claimButton.textContent = "Claim OG Certificate";
+    claimButton.classList.remove("claimed", "already-minted");
+    claimButton.disabled = false;
+    showToast(
+      rejected
+        ? "Transaction rejected."
+        : (err.message || "Transaction failed."),
+      rejected ? "info" : "error"
+    );
   } finally {
     claimPending = false;
   }
@@ -661,27 +681,32 @@ async function claimOGCertificate() {
 
 const PLANS = {
   monthly: {
-    label:       "Monthly Plan",
-    price:       "$25",
-    billing:     "/month",
-    billed:      "Billed $25 monthly",
-    // Replace with your actual Stripe Payment Link after creating one at
-    // https://dashboard.stripe.com/payment-links
-    stripeLink:  "https://buy.stripe.com/REPLACE_MONTHLY",
-    solAmount:   0.25,   // ≈ $25 — update to reflect current SOL price
+    label:      "Monthly Plan",
+    price:      "$25",
+    billing:    "/month",
+    billed:     "Billed $25 monthly",
+    // Create a Stripe Payment Link at https://dashboard.stripe.com/payment-links
+    stripeLink: "https://buy.stripe.com/REPLACE_MONTHLY",
+    usdcAmount: 25,      // USDC (6 decimals) — matches USD price
   },
   yearly: {
-    label:       "Yearly Plan",
-    price:       "$20",
-    billing:     "/month",
-    billed:      "Billed $240 per year — save $60",
-    stripeLink:  "https://buy.stripe.com/REPLACE_YEARLY",
-    solAmount:   2.4,    // ≈ $240 — update to reflect current SOL price
+    label:      "Yearly Plan",
+    price:      "$20",
+    billing:    "/month",
+    billed:     "Billed $240 per year — save $60",
+    stripeLink: "https://buy.stripe.com/REPLACE_YEARLY",
+    usdcAmount: 240,
   },
 };
 
-// Replace with your treasury wallet address to receive SOL payments
+// Treasury wallet that receives USDC subscription payments
 const TREASURY_ADDRESS = "REPLACE_WITH_TREASURY_WALLET_ADDRESS";
+
+// USDC mint addresses
+const USDC_MINT = {
+  "mainnet-beta": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  devnet:         "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+};
 
 let activePlan = null;
 let solPayPending = false;
@@ -696,8 +721,8 @@ function openPricingModal(planKey) {
   pmBillingNote.textContent = plan.billing;
   pmBilledTotal.textContent = plan.billed;
 
-  // Update SOL button label to show amount
-  pmSolLabel.textContent = `Pay ${plan.solAmount} SOL`;
+  // Update USDC button label
+  if (pmUsdcLabel) pmUsdcLabel.textContent = `Pay ${plan.usdcAmount} USDC`;
 
   pricingModal.classList.add("open");
   lockScroll();
@@ -709,7 +734,17 @@ function closePricingModal() {
   activePlan = null;
 }
 
-async function handleSolPayment() {
+// Encode a u64 as little-endian 8 bytes (no BigInt dependency on older browsers)
+function encodeU64LE(n) {
+  const hi = Math.floor(n / 0x1_00_00_00_00);
+  const lo = n >>> 0;
+  return new Uint8Array([
+    lo & 0xff, (lo >>> 8) & 0xff, (lo >>> 16) & 0xff, (lo >>> 24) & 0xff,
+    hi & 0xff, (hi >>> 8) & 0xff, (hi >>> 16) & 0xff, (hi >>> 24) & 0xff,
+  ]);
+}
+
+async function handleUSDCPayment() {
   if (solPayPending) return;
   const plan = PLANS[activePlan];
   if (!plan) return;
@@ -717,7 +752,7 @@ async function handleSolPayment() {
   if (!connectedKey || !provider) {
     closePricingModal();
     openWalletModal();
-    showToast("Connect your wallet to pay with SOL.", "info");
+    showToast("Connect your wallet to pay with USDC.", "info");
     return;
   }
 
@@ -727,26 +762,61 @@ async function handleSolPayment() {
   }
 
   solPayPending = true;
-  pmSolBtn.disabled = true;
-  pmSolLabel.textContent = "Sending…";
+  if (pmUsdcBtn) pmUsdcBtn.disabled = true;
+  if (pmUsdcLabel) pmUsdcLabel.textContent = "Sending…";
 
   try {
-    const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, TransactionInstruction } = solanaWeb3;
-    const MEMO_PROG = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+    const { Connection, PublicKey, Transaction, SystemProgram, TransactionInstruction } = solanaWeb3;
 
-    const connection    = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
-    const fromPubkey    = new PublicKey(connectedKey);
-    const toPubkey      = new PublicKey(TREASURY_ADDRESS);
-    const lamports      = Math.round(plan.solAmount * LAMPORTS_PER_SOL);
+    const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    const ATA_PROGRAM_ID   = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bXp");
+    const MEMO_PROG        = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
+    const usdcMint     = new PublicKey(USDC_MINT[activeNetwork] || USDC_MINT["mainnet-beta"]);
+    const fromPubkey   = new PublicKey(connectedKey);
+    const treasuryKey  = new PublicKey(TREASURY_ADDRESS);
+
+    // Derive sender and treasury USDC ATAs
+    const seeds = (owner) => [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), usdcMint.toBuffer()];
+    const [fromATA]    = PublicKey.findProgramAddressSync(seeds(fromPubkey),  ATA_PROGRAM_ID);
+    const [toATA]      = PublicKey.findProgramAddressSync(seeds(treasuryKey), ATA_PROGRAM_ID);
+
+    const microUsdc    = plan.usdcAmount * 1_000_000; // USDC has 6 decimals
+
+    const connection = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
 
-    tx.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
+    // Ensure treasury USDC ATA exists (idempotent create — no-ops if already exists)
+    tx.add(new TransactionInstruction({
+      keys: [
+        { pubkey: fromPubkey,              isSigner: true,  isWritable: true  },
+        { pubkey: toATA,                   isSigner: false, isWritable: true  },
+        { pubkey: treasuryKey,             isSigner: false, isWritable: false },
+        { pubkey: usdcMint,                isSigner: false, isWritable: false },
+        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        { pubkey: TOKEN_PROGRAM_ID,        isSigner: false, isWritable: false },
+      ],
+      programId: ATA_PROGRAM_ID,
+      data: new Uint8Array([1]), // index 1 = CreateIdempotent
+    }));
+
+    // SPL Token Transfer (instruction 3)
+    tx.add(new TransactionInstruction({
+      keys: [
+        { pubkey: fromATA,    isSigner: false, isWritable: true  },
+        { pubkey: toATA,      isSigner: false, isWritable: true  },
+        { pubkey: fromPubkey, isSigner: true,  isWritable: false },
+      ],
+      programId: TOKEN_PROGRAM_ID,
+      data: new Uint8Array([3, ...encodeU64LE(microUsdc)]),
+    }));
+
+    // On-chain memo
     tx.add(new TransactionInstruction({
       keys:      [{ pubkey: fromPubkey, isSigner: true, isWritable: false }],
       programId: MEMO_PROG,
-      data:      Buffer.from(`SolanaScholar subscription: ${activePlan}`, "utf8"),
+      data:      new TextEncoder().encode(`SolanaScholar:${activePlan}`),
     }));
 
     const signedTx = await provider.signTransaction(tx);
@@ -754,15 +824,22 @@ async function handleSolPayment() {
     await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
 
     closePricingModal();
-    showToast(`Payment confirmed! Welcome to Solana Scholar.`, "success");
+    showToast(`USDC payment confirmed! Welcome to Solana Scholar.`, "success");
     fetchAndDisplayBalance(connectedKey);
   } catch (err) {
     const rejected = err.code === 4001 || err.message?.toLowerCase().includes("rejected");
-    showToast(rejected ? "Payment cancelled." : (err.message || "Payment failed."), "error");
+    showToast(
+      rejected
+        ? "Payment cancelled."
+        : (err.message?.includes("insufficient")
+            ? "Insufficient USDC balance."
+            : (err.message || "Payment failed.")),
+      "error"
+    );
   } finally {
     solPayPending = false;
-    pmSolBtn.disabled = false;
-    if (activePlan) pmSolLabel.textContent = `Pay ${PLANS[activePlan].solAmount} SOL`;
+    if (pmUsdcBtn) pmUsdcBtn.disabled = false;
+    if (pmUsdcLabel && activePlan) pmUsdcLabel.textContent = `Pay ${PLANS[activePlan].usdcAmount} USDC`;
   }
 }
 
@@ -1005,7 +1082,7 @@ pmCardBtn?.addEventListener("click", () => {
   window.open(plan.stripeLink, "_blank", "noopener,noreferrer");
 });
 
-pmSolBtn?.addEventListener("click", handleSolPayment);
+pmUsdcBtn?.addEventListener("click", handleUSDCPayment);
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); closeCoursePanel(); closePricingModal(); }
