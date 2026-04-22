@@ -34,15 +34,7 @@ body {
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 85% 12%, rgba(41, 96, 255, 0.33), transparent 18%),
-    radial-gradient(circle at 74% 44%, rgba(255, 94, 168, 0.26), transparent 18%),
-    radial-gradient(circle at 60% 86%, rgba(123, 67, 255, 0.22), transparent 18%);
-  z-index: -2;
+  display: none;
 }
 
 a {
@@ -78,40 +70,7 @@ a {
 .tone-pink::before,
 .tone-pink-soft::before,
 .tone-purple::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 42px;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.tone-blue::before {
-  background:
-    radial-gradient(circle at 80% 16%, rgba(41, 96, 255, 0.46), transparent 23%),
-    radial-gradient(circle at 18% 8%, rgba(121, 188, 255, 0.2), transparent 24%);
-}
-
-.tone-blue-soft::before {
-  background:
-    linear-gradient(180deg, rgba(17, 31, 74, 0.38), rgba(19, 18, 49, 0.04));
-}
-
-.tone-pink::before {
-  background:
-    radial-gradient(circle at 86% 20%, rgba(255, 94, 168, 0.34), transparent 22%),
-    linear-gradient(180deg, rgba(57, 20, 63, 0.18), rgba(96, 18, 56, 0.12));
-}
-
-.tone-pink-soft::before {
-  background:
-    radial-gradient(circle at 16% 18%, rgba(213, 55, 155, 0.18), transparent 20%);
-}
-
-.tone-purple::before {
-  background:
-    radial-gradient(circle at 78% 22%, rgba(123, 67, 255, 0.28), transparent 22%),
-    linear-gradient(180deg, rgba(44, 21, 95, 0.15), rgba(30, 16, 88, 0.3));
+  display: none;
 }
 
 /* ─── Nav ─────────────────────────────────────── */
@@ -425,10 +384,10 @@ a {
 .card,
 .glass-panel,
 .proof-card {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  backdrop-filter: none;
+  background: linear-gradient(180deg, rgba(14, 18, 35, 0.76), rgba(12, 10, 28, 0.9));
+  border: 1px solid var(--line);
+  box-shadow: var(--hero-shadow);
+  backdrop-filter: blur(16px);
 }
 
 .hero-card,
