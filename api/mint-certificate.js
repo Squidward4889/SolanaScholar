@@ -62,7 +62,9 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: "Invalid server key format" });
     }
 
-    const mintAuthority = Keypair.fromSecretKey(Uint8Array.from(mintAuthoritySecret));
+    // fromSeed uses the first 32 bytes as the Ed25519 private scalar and derives the public key
+    const seed = Uint8Array.from(mintAuthoritySecret.slice(0, 32));
+    const mintAuthority = Keypair.fromSeed(seed);
     const connection = new Connection(DEVNET_RPC, "confirmed");
     const userPublicKey = new PublicKey(walletAddress);
 
