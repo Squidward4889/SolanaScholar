@@ -32,6 +32,9 @@
             <div class="balance-pill hidden" id="balance-pill">
               <span id="balance-output"></span>
             </div>
+            <button class="faucet-button hidden" id="faucet-button" type="button">
+              Get Devnet SOL
+            </button>
             <button class="wallet-button" id="wallet-button" type="button">
               <span class="wallet-button-icon" id="wallet-icon"></span>
               <span id="wallet-label">Connect Wallet</span>
@@ -118,11 +121,16 @@
             <div class="certificate-details" id="certificate-details"></div>
 
             <div class="claim-area">
+              <div class="og-cert-badge">
+                <span class="og-cert-tag">Token-2022</span>
+                <span class="og-cert-tag">Non-Transferable</span>
+                <span class="og-cert-tag">On-chain Metadata</span>
+              </div>
               <button class="button claim-button" id="claim-button" type="button">
-                Claim Certificate On-chain
+                Claim OG Certificate
               </button>
               <div class="tx-result hidden" id="tx-result">
-                <span class="tx-success-label">Certificate minted</span>
+                <span class="tx-success-label" id="tx-label">OG Cert minted</span>
                 <a class="tx-link" id="tx-link" href="#" target="_blank" rel="noopener noreferrer">
                   View on Explorer
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">

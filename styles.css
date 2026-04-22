@@ -206,6 +206,38 @@ a {
   box-shadow: 0 0 7px rgba(251, 191, 36, 0.85);
 }
 
+/* Faucet Button */
+.faucet-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.44rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fbbf24;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.faucet-button:hover {
+  background: rgba(251, 191, 36, 0.14);
+  border-color: rgba(251, 191, 36, 0.5);
+  transform: translateY(-1px);
+}
+
+.faucet-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.faucet-button.hidden {
+  display: none;
+}
+
 /* Balance Pill */
 .balance-pill {
   display: inline-flex;
@@ -748,6 +780,24 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+/* OG Certificate Tags */
+.og-cert-badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.og-cert-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(121, 188, 255, 0.22);
+  background: rgba(121, 188, 255, 0.07);
+  color: var(--cyan);
+  letter-spacing: 0.02em;
 }
 
 .claim-button {

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Data
+// Static Data
 // ─────────────────────────────────────────────────────────────────────────────
 
 const trackData = [
@@ -40,10 +40,7 @@ const certificateMilestones = [
       ["Immutable owner", "Keeps the certificate bound to the learner wallet."],
       ["Memo required", "Creates a clear message when the certificate is issued."]
     ],
-    details: [
-      ["Modules", "6 / 14"],
-      ["Transferability", "Immutable"]
-    ]
+    details: [["Modules", "6 / 14"], ["Transferability", "Immutable"]]
   },
   {
     min: 45,
@@ -55,10 +52,7 @@ const certificateMilestones = [
       ["Verifiable on-chain", "Can be checked publicly and independently."],
       ["Professional issuance", "Issued by leading crypto professionals."]
     ],
-    details: [
-      ["Modules", "11 / 14"],
-      ["Transferability", "Immutable"]
-    ]
+    details: [["Modules", "11 / 14"], ["Transferability", "Immutable"]]
   },
   {
     min: 80,
@@ -70,10 +64,7 @@ const certificateMilestones = [
       ["Immutable ownership", "Confirms permanent learner ownership."],
       ["Innovation-ready", "Built on Solana as the home for crypto-native experimentation."]
     ],
-    details: [
-      ["Modules", "14 / 14"],
-      ["Transferability", "Immutable"]
-    ]
+    details: [["Modules", "14 / 14"], ["Transferability", "Immutable"]]
   }
 ];
 
@@ -124,7 +115,7 @@ const WALLETS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Network Config
+// Network Config — Devnet by default
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NETWORKS = {
@@ -136,22 +127,26 @@ const NETWORKS = {
   devnet: {
     label: "Devnet",
     rpc: "https://api.devnet.solana.com",
-    explorerUrl: (sig) => `https://explorer.solana.com/tx/${sig}?cluster=devnet`
+    explorerUrl: (sig) => `https://explorer.solana.com/tx/${sig}?cluster=devnet`,
+    mintExplorerUrl: (addr) => `https://explorer.solana.com/address/${addr}?cluster=devnet`
   }
 };
+
+const AIRDROP_AMOUNT = 1_000_000_000; // 1 SOL in lamports
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
 // ─────────────────────────────────────────────────────────────────────────────
 
-let provider = null;
-let activeWallet = null;
-let connectedKey = null;
-let activeFilter = "All";
-let activeNetwork = "mainnet-beta";
-let currentTier = null;
-let claimPending = false;
-let openModalCount = 0; // tracks how many modals are open to manage body scroll lock
+let provider       = null;
+let activeWallet   = null;
+let connectedKey   = null;
+let activeFilter   = "All";
+let activeNetwork  = "devnet";
+let currentTier    = null;
+let claimPending   = false;
+let airdropPending = false;
+let openModalCount = 0;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOM References
@@ -176,27 +171,29 @@ const walletIcon     = document.getElementById("wallet-icon");
 const walletLabel    = document.getElementById("wallet-label");
 const balancePill    = document.getElementById("balance-pill");
 const balanceOutput  = document.getElementById("balance-output");
+const faucetButton   = document.getElementById("faucet-button");
 const networkPill    = document.getElementById("network-pill");
 const networkDot     = document.getElementById("network-dot");
 const networkLabel   = document.getElementById("network-label");
 
-const walletModal    = document.getElementById("wallet-modal");
+const walletModal         = document.getElementById("wallet-modal");
 const walletModalBackdrop = document.getElementById("wallet-modal-backdrop");
 const walletModalClose    = document.getElementById("wallet-modal-close");
-const walletList     = document.getElementById("wallet-list");
+const walletList          = document.getElementById("wallet-list");
 
-const networkModal   = document.getElementById("network-modal");
+const networkModal         = document.getElementById("network-modal");
 const networkModalBackdrop = document.getElementById("network-modal-backdrop");
 const networkModalClose    = document.getElementById("network-modal-close");
 
-const claimButton    = document.getElementById("claim-button");
-const txResult       = document.getElementById("tx-result");
-const txLink         = document.getElementById("tx-link");
+const claimButton  = document.getElementById("claim-button");
+const txResult     = document.getElementById("tx-result");
+const txLink       = document.getElementById("tx-link");
+const txLabel      = document.getElementById("tx-label");
 
-const toastStack     = document.getElementById("toast-stack");
+const toastStack   = document.getElementById("toast-stack");
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Toast System
+// Toast
 // ─────────────────────────────────────────────────────────────────────────────
 
 function showToast(message, type = "info") {
@@ -204,23 +201,23 @@ function showToast(message, type = "info") {
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
   toastStack.appendChild(toast);
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => toast.classList.add("toast-visible"));
-  });
-
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add("toast-visible")));
   setTimeout(() => {
     toast.classList.remove("toast-visible");
     toast.addEventListener("transitionend", () => toast.remove(), { once: true });
-  }, 4000);
+  }, 4500);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Wallet Modal
+// Scroll Lock
 // ─────────────────────────────────────────────────────────────────────────────
 
 function lockScroll()   { openModalCount++; document.body.style.overflow = "hidden"; }
 function unlockScroll() { if (--openModalCount <= 0) { openModalCount = 0; document.body.style.overflow = ""; } }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wallet Modal
+// ─────────────────────────────────────────────────────────────────────────────
 
 function openWalletModal() {
   renderWalletList();
@@ -235,7 +232,6 @@ function closeWalletModal() {
 
 function renderWalletList() {
   walletList.innerHTML = "";
-
   WALLETS.forEach((w) => {
     const detected = !!w.getProvider();
     const li = document.createElement("li");
@@ -243,28 +239,13 @@ function renderWalletList() {
     li.setAttribute("role", "button");
     li.setAttribute("tabindex", "0");
     li.innerHTML = `
-      <span class="wallet-option-icon" style="background:${w.color}1a;border-color:${w.color}44;color:${w.color}">
-        ${w.name.charAt(0)}
-      </span>
+      <span class="wallet-option-icon" style="background:${w.color}1a;border-color:${w.color}44;color:${w.color}">${w.name.charAt(0)}</span>
       <span class="wallet-option-name">${w.name}</span>
-      <span class="wallet-option-status ${detected ? "detected" : "install"}">
-        ${detected ? "Detected" : "Install"}
-      </span>
+      <span class="wallet-option-status ${detected ? "detected" : "install"}">${detected ? "Detected" : "Install"}</span>
     `;
-
-    const connect = () => {
-      closeWalletModal();
-      connectWallet(w);
-    };
-
+    const connect = () => { closeWalletModal(); connectWallet(w); };
     li.addEventListener("click", connect);
-    li.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        connect();
-      }
-    });
-
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); connect(); } });
     walletList.appendChild(li);
   });
 }
@@ -291,10 +272,7 @@ function setNetwork(networkId) {
   const net = NETWORKS[networkId];
   if (networkLabel) networkLabel.textContent = net.label;
   if (networkDot)   networkDot.className = `network-dot ${networkId === "mainnet-beta" ? "green" : "yellow"}`;
-
-  if (connectedKey) {
-    fetchAndDisplayBalance(connectedKey);
-  }
+  if (connectedKey) fetchAndDisplayBalance(connectedKey);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -303,21 +281,70 @@ function setNetwork(networkId) {
 
 async function fetchAndDisplayBalance(pubkey) {
   if (typeof solanaWeb3 === "undefined") return;
-
   try {
     const { Connection, PublicKey } = solanaWeb3;
     const connection = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
     const lamports = await connection.getBalance(new PublicKey(pubkey));
     if (lamports === 0) {
-      // Hide pill for zero balance — prevents showing "0.0000 SOL" on fresh wallets
       balancePill.classList.add("hidden");
+      if (faucetButton && activeNetwork === "devnet") faucetButton.classList.remove("hidden");
       return;
     }
-    const sol = (lamports / 1e9).toFixed(4);
+    const sol = (lamports / 1e9).toFixed(3);
     balanceOutput.textContent = `${sol} SOL`;
     balancePill.classList.remove("hidden");
+    // Hide faucet if user has SOL
+    if (faucetButton) faucetButton.classList.add("hidden");
   } catch {
     balancePill.classList.add("hidden");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Devnet Airdrop
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function requestAirdrop() {
+  if (airdropPending || !connectedKey) return;
+  if (activeNetwork !== "devnet") {
+    showToast("Airdrops are only available on Devnet.", "error");
+    return;
+  }
+  if (typeof solanaWeb3 === "undefined") return;
+
+  airdropPending = true;
+  if (faucetButton) {
+    faucetButton.disabled = true;
+    faucetButton.textContent = "Requesting...";
+  }
+
+  try {
+    const { Connection, PublicKey } = solanaWeb3;
+    const connection = new Connection(NETWORKS.devnet.rpc, "confirmed");
+    const pubkey = new PublicKey(connectedKey);
+
+    const sig = await connection.requestAirdrop(pubkey, AIRDROP_AMOUNT);
+    showToast("Airdrop sent! Confirming...", "info");
+
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+
+    showToast("1 devnet SOL received!", "success");
+    await fetchAndDisplayBalance(connectedKey);
+  } catch (err) {
+    const rateLimited = err.message?.toLowerCase().includes("429") || err.message?.toLowerCase().includes("rate");
+    showToast(
+      rateLimited
+        ? "Airdrop rate limited. Try again in 60s or use faucet.solana.com."
+        : "Airdrop failed. Try faucet.solana.com.",
+      "error"
+    );
+  } finally {
+    airdropPending = false;
+    if (faucetButton) {
+      faucetButton.disabled = false;
+      faucetButton.textContent = "Get Devnet SOL";
+    }
   }
 }
 
@@ -325,75 +352,60 @@ async function fetchAndDisplayBalance(pubkey) {
 // Wallet Connection
 // ─────────────────────────────────────────────────────────────────────────────
 
-function shortenAddress(address) {
-  return `${address.slice(0, 4)}...${address.slice(-4)}`;
+function shortenAddress(addr) {
+  return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+}
+
+function attachWalletListeners(p) {
+  p.on?.("disconnect", () => { connectedKey = null; resetWalletUI(); });
+  p.on?.("accountChanged", (pk) => {
+    if (pk) { handleConnected(pk); } else { connectedKey = null; resetWalletUI(); }
+  });
 }
 
 async function handleConnected(publicKey) {
   connectedKey = typeof publicKey === "string" ? publicKey : publicKey?.toString?.() || "";
-
   if (!connectedKey) return;
 
   walletButton.classList.add("connected");
   walletLabel.textContent = shortenAddress(connectedKey);
 
   if (activeWallet) {
-    walletIcon.style.background = `${activeWallet.color}28`;
-    walletIcon.style.borderColor = `${activeWallet.color}55`;
+    walletIcon.style.background   = `${activeWallet.color}28`;
+    walletIcon.style.borderColor  = `${activeWallet.color}55`;
+  }
+
+  // Show faucet button on devnet after connecting
+  if (faucetButton && activeNetwork === "devnet") {
+    faucetButton.classList.remove("hidden");
   }
 
   await fetchAndDisplayBalance(connectedKey);
   showToast(`${activeWallet?.name || "Wallet"} connected`, "success");
 }
 
-/** Attach wallet event listeners — extracted to avoid duplication across connect paths. */
-function attachWalletListeners(p) {
-  p.on?.("disconnect", () => {
-    connectedKey = null;
-    resetWalletUI();
-  });
-
-  p.on?.("accountChanged", (pk) => {
-    if (pk) {
-      handleConnected(pk);
-    } else {
-      connectedKey = null;
-      resetWalletUI();
-    }
-  });
-}
-
 async function connectWallet(walletDef) {
   const p = walletDef.getProvider();
-
   if (!p) {
     window.open(walletDef.url, "_blank", "noopener,noreferrer");
     showToast(`${walletDef.name} not installed. Opening install page.`, "info");
     return;
   }
-
   try {
     const response = await p.connect();
-    provider = p;
+    provider     = p;
     activeWallet = walletDef;
     await handleConnected(response.publicKey);
     attachWalletListeners(p);
   } catch (err) {
-    if (err.code !== 4001) {
-      showToast("Connection failed. Please try again.", "error");
-    }
+    if (err.code !== 4001) showToast("Connection failed. Please try again.", "error");
   }
 }
 
 async function disconnectWallet() {
-  try {
-    await provider?.disconnect();
-  } catch {
-    // ignore disconnect errors
-  }
-
+  try { await provider?.disconnect(); } catch {}
   connectedKey = null;
-  provider = null;
+  provider     = null;
   activeWallet = null;
   resetWalletUI();
   showToast("Wallet disconnected", "info");
@@ -401,98 +413,106 @@ async function disconnectWallet() {
 
 function resetWalletUI() {
   walletButton.classList.remove("connected");
-  walletLabel.textContent = "Connect Wallet";
-  walletIcon.style.background = "";
-  walletIcon.style.borderColor = "";
+  walletLabel.textContent    = "Connect Wallet";
+  walletIcon.style.background   = "";
+  walletIcon.style.borderColor  = "";
   balancePill.classList.add("hidden");
+  if (faucetButton) faucetButton.classList.add("hidden");
 
-  // Clear any in-flight claim state so the button isn't stuck
+  // Reset claim state
   claimPending = false;
   claimButton.disabled = false;
   claimButton.classList.remove("claimed");
-  claimButton.textContent = "Claim Certificate On-chain";
+  claimButton.textContent = "Claim OG Certificate";
   txResult.classList.add("hidden");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Certificate Claiming (Solana Memo Program)
+// OG Certificate — Token-2022 via Serverless API
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function claimCertificate() {
+async function claimOGCertificate() {
   if (claimPending) return;
 
   if (!connectedKey || !provider) {
-    showToast("Connect your wallet to claim this certificate.", "error");
+    showToast("Connect your wallet first.", "error");
     openWalletModal();
     return;
   }
 
   if (typeof solanaWeb3 === "undefined") {
-    showToast("Solana library not loaded. Please refresh.", "error");
+    showToast("Solana library not loaded. Refresh the page.", "error");
     return;
   }
 
   claimPending = true;
-  claimButton.disabled = true;
-  claimButton.textContent = "Sending transaction...";
+  claimButton.disabled  = true;
+  claimButton.textContent = "Building transaction...";
   txResult.classList.add("hidden");
 
   try {
-    const { Connection, PublicKey, Transaction, TransactionInstruction } = solanaWeb3;
-    const connection = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
-    const publicKey = new PublicKey(connectedKey);
-
-    // Solana Memo Program — records data on-chain tied to the signer
-    const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-
-    const memoText = `SolanaScholar|v1|${currentTier}|${Date.now()}`;
-
-    const ix = new TransactionInstruction({
-      keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
-      programId: MEMO_PROGRAM_ID,
-      data: new TextEncoder().encode(memoText)
+    // 1. Request partially-signed transaction from our serverless API
+    const apiBase = window.location.origin;
+    const response = await fetch(`${apiBase}/api/mint-certificate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ walletAddress: connectedKey, tier: currentTier }),
     });
 
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
-
-    const tx = new Transaction({
-      recentBlockhash: blockhash,
-      feePayer: publicKey
-    }).add(ix);
-
-    let signature;
-
-    // Use signAndSendTransaction if available (Phantom, Backpack), otherwise sign then send
-    if (provider.signAndSendTransaction) {
-      const result = await provider.signAndSendTransaction(tx);
-      signature = result.signature;
-    } else {
-      const signed = await provider.signTransaction(tx);
-      signature = await connection.sendRawTransaction(signed.serialize());
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `API error ${response.status}`);
     }
+
+    const { transaction: txBase64, mintAddress, blockhash, lastValidBlockHeight } = await response.json();
+
+    // 2. Deserialize the partially-signed transaction
+    const { Transaction, Connection } = solanaWeb3;
+    const txBytes = Uint8Array.from(atob(txBase64), (c) => c.charCodeAt(0));
+    const tx = Transaction.from(txBytes);
+
+    claimButton.textContent = "Awaiting signature...";
+
+    // 3. User signs the transaction (they are the feePayer)
+    let signedTx;
+    if (provider.signTransaction) {
+      signedTx = await provider.signTransaction(tx);
+    } else {
+      throw new Error("Wallet does not support signTransaction");
+    }
+
+    claimButton.textContent = "Sending to Solana...";
+
+    // 4. Send the fully-signed transaction
+    const connection = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
+    const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+      skipPreflight: false,
+      preflightCommitment: "confirmed",
+    });
 
     showToast("Transaction sent. Confirming on-chain...", "info");
 
-    await connection.confirmTransaction(
-      { signature, blockhash, lastValidBlockHeight },
-      "confirmed"
-    );
+    // 5. Confirm
+    await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
 
-    const explorerUrl = NETWORKS[activeNetwork].explorerUrl(signature);
+    // 6. Show success
+    const explorerUrl = NETWORKS[activeNetwork].mintExplorerUrl
+      ? NETWORKS[activeNetwork].mintExplorerUrl(mintAddress)
+      : NETWORKS[activeNetwork].explorerUrl(signature);
 
     txLink.href = explorerUrl;
+    if (txLabel) txLabel.textContent = `OG Cert minted · ${mintAddress.slice(0, 6)}...${mintAddress.slice(-4)}`;
     txResult.classList.remove("hidden");
 
-    claimButton.textContent = "Claimed!";
+    claimButton.textContent = "Certificate Claimed!";
     claimButton.classList.add("claimed");
     claimButton.disabled = false;
 
-    showToast(`${currentTier} certificate minted on Solana!`, "success");
-
-    // Refresh balance after fee deduction
+    showToast("OG User Certificate minted on Solana!", "success");
     setTimeout(() => fetchAndDisplayBalance(connectedKey), 1500);
+
   } catch (err) {
-    claimButton.textContent = "Claim Certificate On-chain";
+    claimButton.textContent = "Claim OG Certificate";
     claimButton.classList.remove("claimed");
     claimButton.disabled = false;
 
@@ -511,28 +531,19 @@ const filters = ["All", ...new Set(trackData.map((t) => t.category))];
 
 function renderFilters() {
   controls.innerHTML = "";
-
   filters.forEach((filter) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `filter-chip${filter === activeFilter ? " active" : ""}`;
-    button.textContent = filter;
-    button.addEventListener("click", () => {
-      activeFilter = filter;
-      renderFilters();
-      renderTracks();
-    });
-    controls.appendChild(button);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `filter-chip${filter === activeFilter ? " active" : ""}`;
+    btn.textContent = filter;
+    btn.addEventListener("click", () => { activeFilter = filter; renderFilters(); renderTracks(); });
+    controls.appendChild(btn);
   });
 }
 
 function renderTracks() {
-  const visible = activeFilter === "All"
-    ? trackData
-    : trackData.filter((t) => t.category === activeFilter);
-
+  const visible = activeFilter === "All" ? trackData : trackData.filter((t) => t.category === activeFilter);
   grid.innerHTML = "";
-
   visible.forEach((track) => {
     const card = document.createElement("article");
     card.className = "track-card card";
@@ -544,9 +555,7 @@ function renderTracks() {
       </div>
       <h3>${track.title}</h3>
       <p>${track.description}</p>
-      <ul class="track-list">
-        ${track.outcomes.map((item) => `<li>${item}</li>`).join("")}
-      </ul>
+      <ul class="track-list">${track.outcomes.map((o) => `<li>${o}</li>`).join("")}</ul>
     `;
     grid.appendChild(card);
   });
@@ -561,29 +570,27 @@ function getMilestone(progress) {
 }
 
 function renderCertificate(progress) {
-  const milestone = getMilestone(progress);
-  const scoreValue = Math.min(99, Math.round(progress * 0.68 + 45));
-  const metadataValue = Math.min(100, Math.round(progress * 0.88 + 10));
+  const milestone   = getMilestone(progress);
+  const scoreValue  = Math.min(99, Math.round(progress * 0.68 + 45));
+  const metaValue   = Math.min(100, Math.round(progress * 0.88 + 10));
 
   currentTier = milestone.tier;
 
   progressOutput.textContent = `${progress}%`;
-  tierOutput.textContent = milestone.tier;
-  scoreOutput.textContent = `${scoreValue} / 100`;
-
-  badgeOutput.textContent = milestone.tier;
-  certTitle.textContent = milestone.title;
-  certCopy.textContent = milestone.copy;
-
-  masteryBar.style.width = `${scoreValue}%`;
-  metadataBar.style.width = `${metadataValue}%`;
+  tierOutput.textContent     = milestone.tier;
+  scoreOutput.textContent    = `${scoreValue} / 100`;
+  badgeOutput.textContent    = milestone.tier;
+  certTitle.textContent      = milestone.title;
+  certCopy.textContent       = milestone.copy;
+  masteryBar.style.width     = `${scoreValue}%`;
+  metadataBar.style.width    = `${metaValue}%`;
 
   featureList.innerHTML = milestone.features
-    .map(([title, copy]) => `<li><span>${title}</span><strong>${copy}</strong></li>`)
+    .map(([t, c]) => `<li><span>${t}</span><strong>${c}</strong></li>`)
     .join("");
 
   certDetails.innerHTML = milestone.details
-    .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
+    .map(([l, v]) => `<div><span>${l}</span><strong>${v}</strong></div>`)
     .join("");
 }
 
@@ -593,23 +600,18 @@ function renderCertificate(progress) {
 
 function tryEagerReconnect() {
   WALLETS.forEach((w) => {
-    if (connectedKey) return; // already connected by a previous wallet
-
+    if (connectedKey) return;
     const p = w.getProvider();
     if (!p) return;
-
     p.connect({ onlyIfTrusted: true })
       .then(({ publicKey }) => {
         if (!connectedKey) {
-          provider = p;
-          activeWallet = w;
+          provider = p; activeWallet = w;
           handleConnected(publicKey);
           attachWalletListeners(p);
         }
       })
-      .catch(() => {
-        // Ignore: user hasn't trusted this site yet
-      });
+      .catch(() => {});
   });
 }
 
@@ -628,11 +630,7 @@ tryEagerReconnect();
 // ─────────────────────────────────────────────────────────────────────────────
 
 walletButton.addEventListener("click", () => {
-  if (connectedKey) {
-    disconnectWallet();
-  } else {
-    openWalletModal();
-  }
+  if (connectedKey) { disconnectWallet(); } else { openWalletModal(); }
 });
 
 walletModalClose.addEventListener("click", closeWalletModal);
@@ -642,31 +640,25 @@ networkPill?.addEventListener("click", openNetworkModal);
 networkModalClose?.addEventListener("click", closeNetworkModal);
 networkModalBackdrop?.addEventListener("click", closeNetworkModal);
 
-networkModal.querySelectorAll(".network-option").forEach((btn) => {
+networkModal?.querySelectorAll(".network-option").forEach((btn) => {
   btn.addEventListener("click", () => {
     const id = btn.dataset.network;
-    if (id !== activeNetwork) {
-      setNetwork(id);
-      showToast(`Switched to ${NETWORKS[id].label}`, "info");
-    }
+    if (id !== activeNetwork) { setNetwork(id); showToast(`Switched to ${NETWORKS[id].label}`, "info"); }
     closeNetworkModal();
   });
 });
 
-claimButton.addEventListener("click", claimCertificate);
+faucetButton?.addEventListener("click", requestAirdrop);
+claimButton.addEventListener("click", claimOGCertificate);
 
 progressRange.addEventListener("input", (e) => {
   renderCertificate(Number(e.target.value));
-  // Reset claim state when tier changes
   txResult.classList.add("hidden");
-  claimButton.textContent = "Claim Certificate On-chain";
+  claimButton.textContent = "Claim OG Certificate";
   claimButton.classList.remove("claimed");
   claimButton.disabled = false;
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    closeWalletModal();
-    closeNetworkModal();
-  }
+  if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); }
 });
