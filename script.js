@@ -940,7 +940,7 @@ function renderTracks() {
   grid.innerHTML = "";
   visible.forEach((track) => {
     const card = document.createElement("article");
-    card.className = "track-card card";
+    card.className = `track-card card${track.partner ? " track-card--partner" : ""}`;
     card.setAttribute("role", "button");
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-label", `Open ${track.title} course`);

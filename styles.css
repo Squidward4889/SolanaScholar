@@ -730,13 +730,38 @@ a {
 
 .track-partner-tag {
   background: rgba(220, 225, 245, 0.12);
-  border: 1px solid rgba(220, 225, 245, 0.28);
-  color: rgba(235, 238, 255, 0.9);
+  border: 1px solid rgba(220, 225, 245, 0.38);
+  color: rgba(240, 242, 255, 0.95);
   font-size: 0.72rem;
   font-weight: 600;
   padding: 0.22rem 0.6rem;
   border-radius: 999px;
   letter-spacing: 0.01em;
+  box-shadow:
+    0 0 8px rgba(210, 218, 255, 0.25),
+    0 0 18px rgba(210, 218, 255, 0.12);
+}
+
+.track-card--partner {
+  border-color: rgba(210, 218, 255, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(210, 218, 255, 0.1),
+    0 0 28px rgba(210, 218, 255, 0.12),
+    0 0 60px rgba(210, 218, 255, 0.06),
+    var(--hero-shadow);
+  background: linear-gradient(
+    160deg,
+    rgba(22, 26, 58, 0.84),
+    rgba(14, 12, 38, 0.92)
+  );
+}
+
+.track-card--partner:hover {
+  box-shadow:
+    0 0 0 1px rgba(210, 218, 255, 0.2),
+    0 0 40px rgba(210, 218, 255, 0.18),
+    0 0 80px rgba(210, 218, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.28);
 }
 
 /* ─── Course Detail Panel ─────────────────────── */
