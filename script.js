@@ -771,9 +771,9 @@ async function handleUSDCPayment() {
     const ATA_PROGRAM_ID   = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bXp");
     const MEMO_PROG        = new PublicKey("Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo");
 
-    // USDC payments always on mainnet-beta — real money, never devnet
-    // Using Ankr's free public RPC (no API key needed, no browser restrictions)
-    const PAYMENT_RPC  = "https://rpc.ankr.com/solana";
+    // USDC payments always on mainnet-beta — real money, never devnet.
+    // Route through our own Vercel proxy so browser 403 restrictions are bypassed.
+    const PAYMENT_RPC  = window.location.origin + "/api/rpc";
     const usdcMint     = new PublicKey(USDC_MINT["mainnet-beta"]);
     const fromPubkey   = new PublicKey(connectedKey);
     const treasuryKey  = new PublicKey(TREASURY_ADDRESS);
