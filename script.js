@@ -772,7 +772,8 @@ async function handleUSDCPayment() {
     const MEMO_PROG        = new PublicKey("Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo");
 
     // USDC payments always on mainnet-beta — real money, never devnet
-    const PAYMENT_RPC  = "https://api.mainnet-beta.solana.com";
+    // Using Ankr's free public RPC (no API key needed, no browser restrictions)
+    const PAYMENT_RPC  = "https://rpc.ankr.com/solana";
     const usdcMint     = new PublicKey(USDC_MINT["mainnet-beta"]);
     const fromPubkey   = new PublicKey(connectedKey);
     const treasuryKey  = new PublicKey(TREASURY_ADDRESS);
