@@ -256,6 +256,7 @@ const networkModalBackdrop = document.getElementById("network-modal-backdrop");
 const networkModalClose    = document.getElementById("network-modal-close");
 
 const claimButton  = document.getElementById("claim-button");
+const quizError    = document.getElementById("quiz-error");
 const txResult     = document.getElementById("tx-result");
 const txLink       = document.getElementById("tx-link");
 const txLabel      = document.getElementById("tx-label");
@@ -495,6 +496,7 @@ function resetWalletUI() {
   existingMintAddress = null;
   claimButton.classList.remove("claimed", "already-minted");
   txResult.classList.add("hidden");
+  quizError.classList.add("hidden");
   // Restore button to quiz-gated state
   if (isQuizPassed()) {
     claimButton.disabled = false;
@@ -551,6 +553,14 @@ async function claimOGCertificate() {
     showToast("You already hold an OG Certificate!", "info");
     return;
   }
+
+  // Hard guard: quiz must be fully passed
+  if (!isQuizPassed()) {
+    quizError.classList.remove("hidden");
+    setTimeout(() => quizError.classList.add("hidden"), 4000);
+    return;
+  }
+  quizError.classList.add("hidden");
 
   if (!connectedKey || !provider) {
     showToast("Connect your wallet first.", "error");

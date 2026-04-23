@@ -110,7 +110,7 @@
         <div class="section-heading reveal">
           <p class="eyebrow">Certificates</p>
           <h2>Earn your OG Certificate</h2>
-          <p>Answer 3 quick questions and claim an exclusive on-chain certificate minted permanently to your wallet.</p>
+          <p>Answer 3 questions about Solana Scholar and claim an exclusive on-chain certificate for OG users.</p>
         </div>
 
         <div class="og-cert-card card reveal">
@@ -118,11 +118,9 @@
             <div class="og-cert-meta">
               <span class="certificate-chain">Minted on Solana</span>
               <span class="og-tag-sm">Token-2022</span>
-              <span class="og-tag-sm">Non-Transferable</span>
-              <span class="og-tag-sm">On-Chain Metadata</span>
             </div>
             <h3 class="og-cert-name">OG Solana Scholar Certificate</h3>
-            <p class="og-cert-desc">Complete all 3 questions correctly to unlock your exclusive OG certificate — minted directly to your Solana wallet as a non-transferable Token-2022 token.</p>
+            <p class="og-cert-desc">Answer all 3 questions correctly to unlock your exclusive OG certificate, minted directly to your Solana wallet as a non-transferable Token-2022 token.</p>
           </div>
 
           <div class="quiz-wrapper" id="quiz-wrapper">
@@ -161,6 +159,10 @@
             <button class="button claim-button" id="claim-button" type="button" disabled>
               Complete the quiz to claim
             </button>
+            <div class="quiz-error hidden" id="quiz-error">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              <span>Answer all 3 questions correctly before claiming.</span>
+            </div>
             <div class="tx-result hidden" id="tx-result">
               <span class="tx-success-label" id="tx-label">OG Cert minted</span>
               <a class="tx-link" id="tx-link" href="#" target="_blank" rel="noopener noreferrer">
