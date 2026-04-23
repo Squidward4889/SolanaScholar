@@ -769,9 +769,11 @@ async function handleUSDCPayment() {
 
     const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
     const ATA_PROGRAM_ID   = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bXp");
-    const MEMO_PROG        = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+    const MEMO_PROG        = new PublicKey("Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo");
 
-    const usdcMint     = new PublicKey(USDC_MINT[activeNetwork] || USDC_MINT["mainnet-beta"]);
+    // USDC payments always on mainnet-beta — real money, never devnet
+    const PAYMENT_RPC  = "https://api.mainnet-beta.solana.com";
+    const usdcMint     = new PublicKey(USDC_MINT["mainnet-beta"]);
     const fromPubkey   = new PublicKey(connectedKey);
     const treasuryKey  = new PublicKey(TREASURY_ADDRESS);
 
@@ -782,7 +784,7 @@ async function handleUSDCPayment() {
 
     const microUsdc    = plan.usdcAmount * 1_000_000; // USDC has 6 decimals
 
-    const connection = new Connection(NETWORKS[activeNetwork].rpc, "confirmed");
+    const connection = new Connection(PAYMENT_RPC, "confirmed");
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
 
