@@ -5,6 +5,23 @@
 const trackData = [
   {
     category: "Beginner",
+    title: "Self Custody Basics",
+    duration: "2 weeks",
+    proof: "Tier 1",
+    partner: "Powered by Ledger",
+    description: "Learn to securely own your crypto without relying on exchanges or third parties. Covers hardware wallets, seed phrases, and real-world backup strategies.",
+    outcomes: ["Set up a hardware wallet", "Secure your seed phrase", "Avoid common self-custody pitfalls"],
+    modules: [
+      { title: "What Is Self Custody?",        duration: "30 min" },
+      { title: "Hardware Wallets Explained",   duration: "45 min" },
+      { title: "Seed Phrases & Security",      duration: "40 min" },
+      { title: "Multi-sig Wallets",            duration: "50 min" },
+      { title: "Backup Strategies",            duration: "35 min" },
+      { title: "Avoiding Common Mistakes",     duration: "40 min" },
+    ]
+  },
+  {
+    category: "Beginner",
     title: "Crypto Foundations",
     duration: "4 weeks",
     proof: "Tier 1",
@@ -19,22 +36,6 @@ const trackData = [
       { title: "NFTs & Digital Assets",      duration: "40 min" },
       { title: "Reading On-Chain Data",      duration: "55 min" },
       { title: "Crypto Taxation Basics",     duration: "35 min" },
-    ]
-  },
-  {
-    category: "Beginner",
-    title: "Self Custody Basics",
-    duration: "2 weeks",
-    proof: "Tier 1",
-    description: "Learn to securely own your crypto without relying on exchanges or third parties. Covers hardware wallets, seed phrases, and real-world backup strategies.",
-    outcomes: ["Set up a hardware wallet", "Secure your seed phrase", "Avoid common self-custody pitfalls"],
-    modules: [
-      { title: "What Is Self Custody?",        duration: "30 min" },
-      { title: "Hardware Wallets Explained",   duration: "45 min" },
-      { title: "Seed Phrases & Security",      duration: "40 min" },
-      { title: "Multi-sig Wallets",            duration: "50 min" },
-      { title: "Backup Strategies",            duration: "35 min" },
-      { title: "Avoiding Common Mistakes",     duration: "40 min" },
     ]
   },
   {
@@ -947,7 +948,7 @@ function renderTracks() {
       <div class="track-meta">
         <span>${track.category}</span>
         <span>${track.duration}</span>
-        <span>${track.proof}</span>
+        ${track.partner ? `<span class="track-partner-tag">${track.partner}</span>` : ""}
       </div>
       <h3>${track.title}</h3>
       <p>${track.description}</p>

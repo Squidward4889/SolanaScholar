@@ -728,6 +728,17 @@ a {
   opacity: 1;
 }
 
+.track-partner-tag {
+  background: rgba(220, 225, 245, 0.12);
+  border: 1px solid rgba(220, 225, 245, 0.28);
+  color: rgba(235, 238, 255, 0.9);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
 /* ─── Course Detail Panel ─────────────────────── */
 
 .course-panel {
