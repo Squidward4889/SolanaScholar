@@ -102,10 +102,10 @@ a {
   border-bottom: 1px solid rgba(121, 188, 255, 0.07);
 }
 
-.nav-group {
+.nav-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .brand {
@@ -1948,8 +1948,9 @@ a {
     align-items: flex-start;
   }
 
-  .nav-group {
+  .nav-left {
     flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .nav-links {
