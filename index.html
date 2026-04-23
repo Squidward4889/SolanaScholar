@@ -106,69 +106,69 @@
         <div class="track-grid reveal" id="track-grid" aria-live="polite"></div>
       </section>
 
-      <section class="section split-section tone-pink" id="certificate-lab">
+      <section class="section tone-pink" id="certificate-lab">
         <div class="section-heading reveal">
           <p class="eyebrow">Certificates</p>
-          <h2>Dynamic On-chain Certificates</h2>
-          <p>Live credentials that evolve with every milestone and reflect progress in real time.</p>
+          <h2>Earn your OG Certificate</h2>
+          <p>Answer 3 quick questions and claim an exclusive on-chain certificate minted permanently to your wallet.</p>
         </div>
 
-        <div class="certificate-layout reveal">
-          <div class="certificate-controls card">
-            <label for="progress-range">Learning progress</label>
-            <input id="progress-range" type="range" min="8" max="100" step="1" value="42">
-            <div class="progress-meta">
-              <div>
-                <span class="meta-label">Progress</span>
-                <strong id="progress-output">42%</strong>
-              </div>
-              <div>
-                <span class="meta-label">Certificate tier</span>
-                <strong id="tier-output">Explorer</strong>
-              </div>
-              <div>
-                <span class="meta-label">Assessment score</span>
-                <strong id="score-output">77 / 100</strong>
-              </div>
+        <div class="og-cert-card card reveal">
+          <div class="og-cert-top">
+            <div class="og-cert-meta">
+              <span class="certificate-chain">Minted on Solana</span>
+              <span class="og-tag-sm">Token-2022</span>
+              <span class="og-tag-sm">Non-Transferable</span>
+              <span class="og-tag-sm">On-Chain Metadata</span>
             </div>
-
-            <ul class="feature-list" id="certificate-features"></ul>
+            <h3 class="og-cert-name">OG Solana Scholar Certificate</h3>
+            <p class="og-cert-desc">Complete all 3 questions correctly to unlock your exclusive OG certificate — minted directly to your Solana wallet as a non-transferable Token-2022 token.</p>
           </div>
 
-          <div class="certificate-card card">
-            <div class="certificate-header">
-              <span class="certificate-badge" id="badge-output">Explorer</span>
-              <span class="certificate-chain">Minted on Solana</span>
-            </div>
-            <h3 id="certificate-title">Foundations Certificate</h3>
-            <p id="certificate-copy">A verifiable on-chain certificate issued as the learner advances through the curriculum.</p>
-
-            <div class="certificate-bars">
-              <div>
-                <span>Mastery</span>
-                <div class="bar-track"><span id="mastery-bar"></span></div>
-              </div>
-              <div>
-                <span>Metadata completeness</span>
-                <div class="bar-track"><span id="metadata-bar"></span></div>
+          <div class="quiz-wrapper" id="quiz-wrapper">
+            <div class="quiz-block" id="quiz-q1">
+              <p class="quiz-question"><span class="quiz-num">1</span>What blockchain is Solana Scholar built on?</p>
+              <div class="quiz-options">
+                <button class="quiz-opt" data-q="1" data-correct="false" type="button">Ethereum</button>
+                <button class="quiz-opt" data-q="1" data-correct="true"  type="button">Solana</button>
+                <button class="quiz-opt" data-q="1" data-correct="false" type="button">Bitcoin</button>
+                <button class="quiz-opt" data-q="1" data-correct="false" type="button">Avalanche</button>
               </div>
             </div>
 
-            <div class="certificate-details" id="certificate-details"></div>
-
-            <div class="claim-area">
-              <button class="button claim-button" id="claim-button" type="button">
-                Claim OG Certificate
-              </button>
-              <div class="tx-result hidden" id="tx-result">
-                <span class="tx-success-label" id="tx-label">OG Cert minted</span>
-                <a class="tx-link" id="tx-link" href="#" target="_blank" rel="noopener noreferrer">
-                  View on Explorer
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </a>
+            <div class="quiz-block" id="quiz-q2">
+              <p class="quiz-question"><span class="quiz-num">2</span>What token standard does Solana Scholar use for certificates?</p>
+              <div class="quiz-options">
+                <button class="quiz-opt" data-q="2" data-correct="false" type="button">ERC-721</button>
+                <button class="quiz-opt" data-q="2" data-correct="false" type="button">SPL Token</button>
+                <button class="quiz-opt" data-q="2" data-correct="true"  type="button">Token-2022</button>
+                <button class="quiz-opt" data-q="2" data-correct="false" type="button">BEP-20</button>
               </div>
+            </div>
+
+            <div class="quiz-block" id="quiz-q3">
+              <p class="quiz-question"><span class="quiz-num">3</span>What makes Solana Scholar certificates unique?</p>
+              <div class="quiz-options">
+                <button class="quiz-opt" data-q="3" data-correct="false" type="button">They are tradable on NFT marketplaces</button>
+                <button class="quiz-opt" data-q="3" data-correct="false" type="button">They expire after one year</button>
+                <button class="quiz-opt" data-q="3" data-correct="true"  type="button">They are non-transferable and stored on-chain</button>
+                <button class="quiz-opt" data-q="3" data-correct="false" type="button">They are issued as PDF documents</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="claim-area">
+            <button class="button claim-button" id="claim-button" type="button" disabled>
+              Complete the quiz to claim
+            </button>
+            <div class="tx-result hidden" id="tx-result">
+              <span class="tx-success-label" id="tx-label">OG Cert minted</span>
+              <a class="tx-link" id="tx-link" href="#" target="_blank" rel="noopener noreferrer">
+                View on Explorer
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
             </div>
           </div>
         </div>

@@ -1069,86 +1069,155 @@ a {
 
 /* ─── Certificate Section ─────────────────────── */
 
-.certificate-layout {
-  display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-  gap: 1rem;
-}
-
 .card,
 .proof-card {
   padding: 1.4rem;
 }
 
-.certificate-controls label {
-  display: block;
-  margin-bottom: 0.85rem;
-  font-weight: 700;
-}
-
-input[type="range"] {
-  width: 100%;
-  accent-color: var(--pink);
-}
-
-.progress-meta,
-.certificate-details {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 1rem;
-}
-
-.feature-list {
-  margin: 1.1rem 0 0;
-}
-
-.feature-list li {
-  padding: 0.95rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.feature-list li strong {
-  display: block;
-  margin-top: 0.28rem;
-}
-
-.certificate-card {
-  position: relative;
-  min-height: 100%;
+/* OG Cert Card */
+.og-cert-card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 2.2rem;
   display: flex;
   flex-direction: column;
 }
 
-.certificate-card > h3 {
-  margin-top: 1.6rem;
+.og-cert-top {
+  margin-bottom: 0.5rem;
 }
 
-.certificate-card::before {
-  content: "";
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  width: 14rem;
-  height: 14rem;
+.og-cert-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1.1rem;
+}
+
+.certificate-chain {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 94, 168, 0.3);
+  background: rgba(255, 94, 168, 0.08);
+  color: var(--pink);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.og-tag-sm {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(121, 188, 255, 0.22);
+  background: rgba(121, 188, 255, 0.07);
+  color: var(--cyan);
+  letter-spacing: 0.02em;
+}
+
+.og-cert-name {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  margin: 0 0 0.6rem;
+  color: var(--text);
+}
+
+.og-cert-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Quiz */
+.quiz-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0 1rem;
+}
+
+.quiz-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.quiz-question {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 0.85rem;
+  line-height: 1.4;
+}
+
+.quiz-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 1.5rem;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 94, 168, 0.2), transparent 62%);
-  pointer-events: none;
+  background: rgba(121, 188, 255, 0.12);
+  border: 1px solid rgba(121, 188, 255, 0.28);
+  color: var(--cyan);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.certificate-badge {
-  background: linear-gradient(135deg, rgba(121, 188, 255, 0.2), rgba(255, 94, 168, 0.18));
-}
-
-.certificate-bars {
+.quiz-options {
   display: grid;
-  gap: 1rem;
-  margin: 1.5rem 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
 }
 
-.certificate-bars span {
-  display: block;
-  margin-bottom: 0.45rem;
+.quiz-opt {
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-family: "Sora", sans-serif;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+  line-height: 1.4;
+}
+
+.quiz-opt:hover:not(:disabled) {
+  border-color: rgba(121, 188, 255, 0.35);
+  background: rgba(121, 188, 255, 0.08);
+  color: var(--text);
+}
+
+.quiz-opt--selected {
+  border-color: rgba(121, 188, 255, 0.4);
+  background: rgba(121, 188, 255, 0.1);
+  color: var(--text);
+}
+
+.quiz-opt--correct {
+  border-color: rgba(74, 222, 128, 0.5) !important;
+  background: rgba(74, 222, 128, 0.1) !important;
+  color: #4ade80 !important;
+}
+
+.quiz-opt--wrong {
+  border-color: rgba(255, 94, 168, 0.45) !important;
+  background: rgba(255, 94, 168, 0.08) !important;
+  color: var(--pink) !important;
+}
+
+.quiz-opt:disabled {
+  cursor: default;
 }
 
 .bar-track {
@@ -1169,29 +1238,11 @@ input[type="range"] {
 /* ─── Claim Area ──────────────────────────────── */
 
 .claim-area {
-  margin-top: auto;
-  padding-top: 3.2rem;
+  margin-top: 0;
+  padding-top: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-/* OG Certificate Tags */
-.og-cert-badge {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.og-cert-tag {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.22rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid rgba(121, 188, 255, 0.22);
-  background: rgba(121, 188, 255, 0.07);
-  color: var(--cyan);
-  letter-spacing: 0.02em;
 }
 
 .claim-button {
@@ -1928,5 +1979,13 @@ input[type="range"] {
 
   .cp-sidebar {
     order: -1;
+  }
+
+  .quiz-options {
+    grid-template-columns: 1fr;
+  }
+
+  .og-cert-card {
+    padding: 1.4rem;
   }
 }

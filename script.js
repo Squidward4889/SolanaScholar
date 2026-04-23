@@ -235,18 +235,7 @@ let balancePollInterval = null;
 // ─────────────────────────────────────────────────────────────────────────────
 
 const controls       = document.getElementById("track-controls");
-const grid           = document.getElementById("track-grid");
-const progressRange  = document.getElementById("progress-range");
-const progressOutput = document.getElementById("progress-output");
-const tierOutput     = document.getElementById("tier-output");
-const scoreOutput    = document.getElementById("score-output");
-const featureList    = document.getElementById("certificate-features");
-const badgeOutput    = document.getElementById("badge-output");
-const certTitle      = document.getElementById("certificate-title");
-const certCopy       = document.getElementById("certificate-copy");
-const certDetails    = document.getElementById("certificate-details");
-const masteryBar     = document.getElementById("mastery-bar");
-const metadataBar    = document.getElementById("metadata-bar");
+const grid = document.getElementById("track-grid");
 
 const walletButton   = document.getElementById("wallet-button");
 const walletLabel    = document.getElementById("wallet-label");
@@ -504,10 +493,16 @@ function resetWalletUI() {
   claimPending        = false;
   certAlreadyMinted   = false;
   existingMintAddress = null;
-  claimButton.disabled = false;
   claimButton.classList.remove("claimed", "already-minted");
-  claimButton.textContent = "Claim OG Certificate";
   txResult.classList.add("hidden");
+  // Restore button to quiz-gated state
+  if (isQuizPassed()) {
+    claimButton.disabled = false;
+    claimButton.textContent = "Claim OG Certificate";
+  } else {
+    claimButton.disabled = true;
+    claimButton.textContent = "Complete the quiz to claim";
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -655,9 +650,9 @@ async function claimOGCertificate() {
       }
     }
 
-    claimButton.textContent = "Claim OG Certificate";
     claimButton.classList.remove("claimed", "already-minted");
     claimButton.disabled = false;
+    claimButton.textContent = "Claim OG Certificate";
     showToast(
       rejected
         ? "Transaction rejected."
@@ -969,29 +964,51 @@ function getMilestone(progress) {
   return [...certificateMilestones].reverse().find((m) => progress >= m.min);
 }
 
-function renderCertificate(progress) {
-  const milestone   = getMilestone(progress);
-  const scoreValue  = Math.min(99, Math.round(progress * 0.68 + 45));
-  const metaValue   = Math.min(100, Math.round(progress * 0.88 + 10));
+// ─────────────────────────────────────────────────────────────────────────────
+// Quiz Logic
+// ─────────────────────────────────────────────────────────────────────────────
 
-  currentTier = milestone.tier;
+const quizAnswers = { 1: null, 2: null, 3: null };
 
-  progressOutput.textContent = `${progress}%`;
-  tierOutput.textContent     = milestone.tier;
-  scoreOutput.textContent    = `${scoreValue} / 100`;
-  badgeOutput.textContent    = milestone.tier;
-  certTitle.textContent      = milestone.title;
-  certCopy.textContent       = milestone.copy;
-  masteryBar.style.width     = `${scoreValue}%`;
-  metadataBar.style.width    = `${metaValue}%`;
+function isQuizPassed() {
+  return quizAnswers[1] === true && quizAnswers[2] === true && quizAnswers[3] === true;
+}
 
-  featureList.innerHTML = milestone.features
-    .map(([t, c]) => `<li><span>${t}</span><strong>${c}</strong></li>`)
-    .join("");
+function initQuiz() {
+  document.querySelectorAll(".quiz-opt").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const q       = parseInt(btn.dataset.q);
+      const correct = btn.dataset.correct === "true";
 
-  certDetails.innerHTML = milestone.details
-    .map(([l, v]) => `<div><span>${l}</span><strong>${v}</strong></div>`)
-    .join("");
+      // If already answered correctly, ignore further clicks
+      if (quizAnswers[q] === true) return;
+
+      // Clear previous selection for this question
+      document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach((b) => {
+        b.classList.remove("quiz-opt--selected", "quiz-opt--correct", "quiz-opt--wrong");
+        b.disabled = false;
+      });
+
+      // Mark selection
+      btn.classList.add("quiz-opt--selected");
+      if (correct) {
+        btn.classList.add("quiz-opt--correct");
+        quizAnswers[q] = true;
+        // Lock all options for this question
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach((b) => b.disabled = true);
+      } else {
+        btn.classList.add("quiz-opt--wrong");
+        quizAnswers[q] = false;
+      }
+
+      // Enable claim button if all 3 correct
+      if (isQuizPassed() && !certAlreadyMinted) {
+        claimButton.disabled = false;
+        claimButton.textContent = "Claim OG Certificate";
+        claimButton.classList.remove("already-minted");
+      }
+    });
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1021,7 +1038,7 @@ function tryEagerReconnect() {
 
 renderFilters();
 renderTracks();
-renderCertificate(Number(progressRange.value));
+initQuiz();
 setNetwork(activeNetwork);
 tryEagerReconnect();
 
@@ -1051,13 +1068,6 @@ networkModal?.querySelectorAll(".network-option").forEach((btn) => {
 faucetButton?.addEventListener("click", openFaucet);
 claimButton.addEventListener("click", claimOGCertificate);
 
-progressRange.addEventListener("input", (e) => {
-  renderCertificate(Number(e.target.value));
-  txResult.classList.add("hidden");
-  claimButton.textContent = "Claim OG Certificate";
-  claimButton.classList.remove("claimed");
-  claimButton.disabled = false;
-});
 
 coursePanelClose?.addEventListener("click", closeCoursePanel);
 
