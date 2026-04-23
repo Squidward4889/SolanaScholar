@@ -129,7 +129,7 @@ a {
   display: flex;
   gap: 1.4rem;
   color: var(--muted);
-  margin-left: 2rem;
+  margin-left: 1.5rem;
 }
 
 .nav-links a:hover,
