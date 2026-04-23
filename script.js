@@ -699,7 +699,7 @@ const PLANS = {
 };
 
 // Treasury wallet that receives USDC subscription payments
-const TREASURY_ADDRESS = "REPLACE_WITH_TREASURY_WALLET_ADDRESS";
+const TREASURY_ADDRESS = "9dpvWxxWAA3GwAqt5t3HkdzWrG1Lfn2F3X5DCKvuH8w5";
 
 // USDC mint addresses
 const USDC_MINT = {
@@ -1089,10 +1089,34 @@ document.querySelectorAll(".subscribe-btn").forEach((btn) => {
   btn.addEventListener("click", () => openPricingModal(btn.dataset.plan));
 });
 
-pmCardBtn?.addEventListener("click", () => {
+pmCardBtn?.addEventListener("click", async () => {
   const plan = PLANS[activePlan];
   if (!plan) return;
-  window.open(plan.stripeLink, "_blank", "noopener,noreferrer");
+
+  const originalHTML = pmCardBtn.innerHTML;
+  pmCardBtn.disabled = true;
+  pmCardBtn.innerHTML = "Redirecting to checkout…";
+
+  try {
+    const res  = await fetch("/api/create-checkout-session", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ plan: activePlan }),
+    });
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;   // redirect to Stripe Checkout
+    } else {
+      showToast(data.error || "Card payment unavailable. Try again.", "error");
+      pmCardBtn.disabled  = false;
+      pmCardBtn.innerHTML = originalHTML;
+    }
+  } catch (err) {
+    showToast("Could not reach payment server. Please try again.", "error");
+    pmCardBtn.disabled  = false;
+    pmCardBtn.innerHTML = originalHTML;
+  }
 });
 
 pmUsdcBtn?.addEventListener("click", handleUSDCPayment);
@@ -1100,3 +1124,22 @@ pmUsdcBtn?.addEventListener("click", handleUSDCPayment);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeWalletModal(); closeNetworkModal(); closeCoursePanel(); closePricingModal(); }
 });
+
+// ─── Stripe redirect result ───────────────────────────────────────────────────
+(function handleStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const result = params.get("payment");
+  if (!result) return;
+
+  // Clean the URL so refresh doesn't re-trigger the toast
+  const cleanUrl = window.location.pathname;
+  window.history.replaceState({}, "", cleanUrl);
+
+  if (result === "success") {
+    const plan = params.get("plan");
+    const label = plan === "yearly" ? "yearly" : "monthly";
+    showToast(`Payment confirmed! Welcome to Solana Scholar (${label} plan).`, "success");
+  } else if (result === "cancelled") {
+    showToast("Payment cancelled — no charge was made.", "info");
+  }
+}());
