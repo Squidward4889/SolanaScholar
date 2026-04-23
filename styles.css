@@ -831,7 +831,7 @@ a {
 
 .cp-cat,
 .cp-dur,
-.cp-proof {
+.cp-partner-tag {
   font-size: 0.72rem;
   font-weight: 600;
   padding: 0.22rem 0.65rem;
@@ -851,10 +851,11 @@ a {
   color: var(--cyan);
 }
 
-.cp-proof {
-  background: rgba(255, 94, 168, 0.1);
-  border: 1px solid rgba(255, 94, 168, 0.22);
-  color: var(--pink);
+.cp-partner-tag {
+  background: rgba(220, 225, 245, 0.12);
+  border: 1px solid rgba(220, 225, 245, 0.42);
+  color: rgba(240, 242, 255, 0.95);
+  box-shadow: 0 0 10px rgba(210, 218, 255, 0.32), 0 0 22px rgba(210, 218, 255, 0.14);
 }
 
 .cp-title {

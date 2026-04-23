@@ -860,7 +860,6 @@ function openCoursePanel(track) {
 
   const detailsHTML = [
     ["Duration",    track.duration],
-    ["Certificate", track.proof],
     ["Modules",     track.modules.length],
     ["Level",       track.category],
   ].map(([l, v]) => `<div class="panel-detail-row"><span>${l}</span><strong>${v}</strong></div>`).join("");
@@ -874,7 +873,7 @@ function openCoursePanel(track) {
       <div class="cp-meta-row">
         <span class="cp-cat">${track.category}</span>
         <span class="cp-dur">${track.duration}</span>
-        <span class="cp-proof">${track.proof}</span>
+        ${track.partner ? `<span class="cp-partner-tag">${track.partner}</span>` : ""}
       </div>
       <h1 id="course-panel-title" class="cp-title">${track.title}</h1>
       <p class="cp-desc">${track.description}</p>
