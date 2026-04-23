@@ -1381,6 +1381,57 @@ a {
   color: var(--text);
 }
 
+/* ─── Why Solana Table Card ───────────────────── */
+
+.solana-table {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+}
+
+.solana-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1rem 1.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.solana-table-header span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text);
+}
+
+.solana-table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1.1rem 1.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 150ms ease;
+}
+
+.solana-table-row:last-child {
+  border-bottom: none;
+}
+
+.solana-table-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.solana-table-row span:first-child {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.solana-table-row span:last-child {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
 /* ─── Feature Grid ────────────────────────────── */
 
 .feature-grid {
