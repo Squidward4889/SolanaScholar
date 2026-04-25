@@ -1984,26 +1984,89 @@ a {
 }
 
 @media (max-width: 760px) {
+
+  /* ── Nav: logo + wallet on row 1, links as scrollable strip on row 2 ── */
+  .nav {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    padding: 0.6rem 1rem;
+  }
+
+  .brand {
+    flex-shrink: 0;
+  }
+
+  .wallet-bar {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .nav-links {
+    order: 2;
+    width: 100%;
+    margin-left: 0;
+    gap: 1.4rem;
+    padding: 0.55rem 0 0.1rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 0.5rem;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Hero ── */
   .hero,
   .section {
     width: min(100% - 1.2rem, 1160px);
   }
 
-  .nav {
-    flex-direction: column;
-    align-items: flex-start;
+  .hero {
+    padding-top: 148px;
+    min-height: 100svh;
+    justify-content: flex-start;
   }
 
-  .nav-links {
-    flex-wrap: wrap;
+  .hero-grid {
+    gap: 2rem;
   }
 
-  .wallet-bar {
-    flex-wrap: wrap;
+  .hero-copy h1 {
+    font-size: clamp(2rem, 9.5vw, 2.8rem);
+    max-width: 100%;
   }
 
+  .hero-text {
+    font-size: 0.9rem;
+  }
+
+  /* ── Stat cards ── */
+  .stat-card {
+    padding: 0.85rem 1rem;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .hero-stats {
+    gap: 0.6rem;
+  }
+
+  /* ── Section headings ── */
+  .section-heading h2 {
+    font-size: clamp(1.6rem, 6.5vw, 2.2rem);
+  }
+
+  /* ── Grids → single column ── */
   .track-grid,
   .feature-grid,
+  .pricing-grid,
   .progress-meta,
   .certificate-details,
   .hero-panel-grid {
@@ -2014,21 +2077,71 @@ a {
     grid-column: auto;
   }
 
-  .toast-stack {
-    bottom: 1rem;
-    right: 1rem;
-    left: 1rem;
+  /* ── Solana table: stack rows ── */
+  .solana-table {
+    margin: 1.5rem 0 0;
   }
 
-  .toast {
-    max-width: 100%;
+  .solana-table-header {
+    grid-template-columns: 1fr;
+    padding: 0.85rem 1.2rem;
+    gap: 0;
   }
 
-  .wallet-modal-panel {
-    border-radius: var(--radius-lg);
+  .solana-table-header span:last-child {
+    display: none;
+  }
+
+  .solana-table-row {
+    grid-template-columns: 1fr;
+    padding: 1rem 1.2rem;
+    gap: 0.3rem;
+  }
+
+  .solana-table-row span:first-child {
+    white-space: normal;
+    font-size: 0.9rem;
+  }
+
+  .solana-table-row span:last-child {
+    font-size: 0.85rem;
+    color: var(--cyan);
+    opacity: 0.9;
+  }
+
+  .solana-table-row span:last-child::before {
+    content: "→ ";
+  }
+
+  /* ── OG Cert / Quiz ── */
+  .og-cert-card {
     padding: 1.2rem;
   }
 
+  .quiz-options {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Modals: slide up from bottom ── */
+  .pricing-modal-panel,
+  .wallet-modal-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    transform: none;
+    border-radius: 1.2rem 1.2rem 0 0;
+    max-height: 90svh;
+    overflow-y: auto;
+    padding: 1.4rem 1.2rem 2rem;
+  }
+
+  .wallet-modal-panel {
+    padding: 1.4rem 1.2rem 2.5rem;
+  }
+
+  /* ── Course panel ── */
   .course-panel-inner {
     padding: 0 1rem 4rem;
   }
@@ -2041,11 +2154,19 @@ a {
     order: -1;
   }
 
-  .quiz-options {
-    grid-template-columns: 1fr;
+  /* ── Toasts ── */
+  .toast-stack {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
   }
 
-  .og-cert-card {
-    padding: 1.4rem;
+  .toast {
+    max-width: 100%;
+  }
+
+  /* ── Closing card ── */
+  .closing-card h2 {
+    font-size: clamp(1.5rem, 7vw, 2.2rem);
   }
 }
