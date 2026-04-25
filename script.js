@@ -1046,6 +1046,52 @@ function tryEagerReconnect() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Scroll Reveal (IntersectionObserver)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add("is-visible");
+    revealObserver.unobserve(entry.target);
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stat Counter Animation
+// ─────────────────────────────────────────────────────────────────────────────
+
+function easeOutQuart(t) {
+  return 1 - Math.pow(1 - t, 4);
+}
+
+function animateCounter(el, target, duration) {
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const value    = Math.round(easeOutQuart(progress) * target);
+    el.textContent = value.toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString();
+  }
+  requestAnimationFrame(step);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    const el     = entry.target;
+    const target = parseInt(el.dataset.count, 10);
+    animateCounter(el, target, 5500);
+    counterObserver.unobserve(el);
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll("[data-count]").forEach((el) => counterObserver.observe(el));
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Init
 // ─────────────────────────────────────────────────────────────────────────────
 
