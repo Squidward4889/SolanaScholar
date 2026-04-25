@@ -1679,8 +1679,10 @@ a {
 }
 
 .vision-highlight {
-  color: #8d63ff;
-  text-shadow: 0 0 24px rgba(141, 99, 255, 0.32);
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* ─── Wallet Modal ────────────────────────────── */
