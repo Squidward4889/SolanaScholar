@@ -1072,9 +1072,9 @@ function animateCounter(el, target, duration) {
   function step(now) {
     const progress = Math.min((now - start) / duration, 1);
     const value    = Math.round(easeOutQuart(progress) * target);
-    el.textContent = value.toLocaleString();
+    el.textContent = value.toLocaleString("en-US");
     if (progress < 1) requestAnimationFrame(step);
-    else el.textContent = target.toLocaleString();
+    else el.textContent = target.toLocaleString("en-US");
   }
   requestAnimationFrame(step);
 }
